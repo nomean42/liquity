@@ -4,7 +4,6 @@ import { isAddress, getAddress } from "@ethersproject/address";
 export type LiquityFrontendConfig = {
   frontendTag: string;
   infuraApiKey?: string;
-  testnetOnly?: boolean;
 };
 
 const defaultConfig: LiquityFrontendConfig = {
@@ -40,17 +39,6 @@ const parseConfig = (json: unknown): LiquityFrontendConfig => {
         console.log(infuraApiKey);
       }
     }
-
-    if (hasKey(json, "testnetOnly")) {
-      const { testnetOnly } = json;
-
-      if (typeof testnetOnly === "boolean") {
-        config.testnetOnly = testnetOnly;
-      } else {
-        console.error("Malformed testnetOnly:");
-        console.log(testnetOnly);
-      }
-    }
   } else {
     console.error("Malformed config:");
     console.log(json);
@@ -65,8 +53,10 @@ const fetchConfig = async () => {
   try {
     const response = await fetch("config.json");
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch config.json (status ${response.status})`);
+    if (response.status !== 200) {
+      throw new Error(
+        `Failed to fetch config.json (expected status 200 but got ${response.status})`
+      );
     }
 
     return parseConfig(await response.json());
