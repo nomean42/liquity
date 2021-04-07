@@ -287,7 +287,9 @@ const theme: Theme = {
       top: 0,
       right: 3,
       left: 3,
-      mt: "72px"
+      mt: "72px",
+      height: "80%",
+      overflowY: "scroll"
     },
 
     tooltip: {
@@ -362,6 +364,7 @@ const theme: Theme = {
       maxWidth: "912px",
       mx: "auto",
       mt: ["40px", 0],
+      mb: ["40px", "40px"],
       px: cardGapX
     },
 
