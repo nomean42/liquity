@@ -25,7 +25,10 @@ import { LoadingOverlay } from "../LoadingOverlay";
 import { useStakingView } from "./context/StakingViewContext";
 import { OneLineInfo } from "../OneLineInfo";
 
-const selectLQTYBalance = ({ lqtyBalance }: LiquityStoreState) => lqtyBalance;
+const select = ({ lqtyBalance, totalStakedLQTY }: LiquityStoreState) => ({
+  lqtyBalance,
+  totalStakedLQTY,
+});
 
 type StakingEditorProps = {
   title: string;
@@ -84,7 +87,7 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
   editedLQTY,
   dispatch,
 }) => {
-  const lqtyBalance = useLiquitySelector(selectLQTYBalance);
+  const { lqtyBalance, totalStakedLQTY } = useLiquitySelector(select);
   const { changePending, kind } = useStakingView();
   const [invalid, setInvalid] = useState(false);
   const inputComponent = useRef(null);
@@ -124,6 +127,14 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
     },
     [setInputAmount, setInvalid]
   );
+
+  const originalPoolShare = parseDecimalishToNumber(
+    originalStake.stakedLQTY.mulDiv(100, totalStakedLQTY)
+  );
+  const newPoolShare =
+    (editedLQTYAmount * 100) / parseDecimalishToNumber(totalStakedLQTY);
+  const poolShareChange =
+    originalStake.stakedLQTY.nonZero && newPoolShare - originalPoolShare;
 
   useEffect(() => {
     if (!Number.isNaN(inputAmount)) {
@@ -221,19 +232,37 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
         {!originalStake.isEmpty && (
           <OneLineInfo
             infoElements={[
+              newPoolShare
+                ? {
+                    title: "Pool share",
+                    inputId: "stake-share",
+                    amount: prettifyNumber(newPoolShare),
+                    pendingAmount: poolShareChange
+                      ? prettifyNumber(poolShareChange) + "%"
+                      : undefined,
+                    pendingColor:
+                      poolShareChange && poolShareChange > 0
+                        ? "success"
+                        : "danger",
+                    unit: "%",
+                  }
+                : {
+                    title: "Pool share",
+                    inputId: "stake-share",
+                    amount: "N/A",
+                  },
               {
                 title: "Redemption gain",
                 inputId: "stake-gain-eth",
                 amount: originalStake.collateralGain.prettify(4),
-                colorGetter: () =>
-                  originalStake.collateralGain.nonZero && "success",
+                color: originalStake.collateralGain.nonZero && "success",
                 unit: ETH,
               },
               {
                 title: "Issuance gain",
                 inputId: "stake-gain-lusd",
                 amount: originalStake.lusdGain.prettify(),
-                colorGetter: () => originalStake.lusdGain.nonZero && "success",
+                color: originalStake.lusdGain.nonZero && "success",
                 unit: COIN,
               },
             ]}

@@ -63,7 +63,7 @@ const PendingAmount: React.FC<PendingAmountProps & SxProp> = ({ sx, value }) => 
   </Text>
 );
 
-type StaticAmountsProps = {
+export type StaticAmountsProps = {
   inputId: string;
   labelledBy?: string;
   amount: string;

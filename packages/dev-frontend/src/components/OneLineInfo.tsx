@@ -1,14 +1,9 @@
 import React from "react";
-import { Flex, Label } from "theme-ui";
-import { StaticAmounts } from "./Trove/Editor";
+import { Box, Flex, Label } from "theme-ui";
+import { StaticAmounts, StaticAmountsProps } from "./Trove/Editor";
 
-interface IInfoConfig {
+interface IInfoConfig extends StaticAmountsProps {
   title: React.ReactNode | string;
-  inputId: string;
-  amount: string;
-  colorGetter?: () => string | undefined;
-  labelledBy?: string;
-  unit?: string;
 }
 
 interface IProps {
@@ -20,50 +15,21 @@ const createInfoTitleElement = (title: IInfoConfig["title"]): React.ReactNode =>
     React.isValidElement(title) ? (
       title
     ) : (
-      <Label sx={{ py: 0, fontSize: 1 }}>{title}</Label>
+      <Label sx={{ py: 0, px: 0, fontSize: 1 }}>{title}</Label>
     )
   ) : null;
 
 const createInfoAmountElement = (
-  inputId: IInfoConfig["inputId"],
-  amount: IInfoConfig["amount"],
-  colorGetter: IInfoConfig["colorGetter"],
-  labelledBy: IInfoConfig["labelledBy"],
-  unit: IInfoConfig["unit"]
-): React.ReactNode => (
-  <StaticAmounts
-    sx={{ pt: "0", pl: "2" }}
-    inputId={inputId}
-    amount={amount}
-    color={colorGetter?.()}
-    unit={unit}
-  />
+  props: StaticAmountsProps
+): React.ReactNode => <StaticAmounts sx={{ p: "0" }} {...props} />;
+
+export const OneLineInfo: React.FC<IProps> = ({ infoElements }) => (
+  <Flex sx={{ p: 0, justifyContent: "space-between" }}>
+    {infoElements.map(({ title, ...staticAmountProps }) => (
+      <Box sx={{ px: 2 }}>
+        {createInfoTitleElement(title)}
+        {createInfoAmountElement(staticAmountProps)}
+      </Box>
+    ))}
+  </Flex>
 );
-
-export const OneLineInfo: React.FC<IProps> = ({ infoElements }) => {
-  const { titles, amounts } = infoElements.reduce<{
-    titles: React.ReactNode[];
-    amounts: React.ReactNode[];
-  }>(
-    (acc, { title, inputId, amount, colorGetter, labelledBy, unit }) => {
-      acc.titles.push(createInfoTitleElement(title));
-      acc.amounts.push(
-        createInfoAmountElement(inputId, amount, colorGetter, labelledBy, unit)
-      );
-
-      return acc;
-    },
-    { titles: [], amounts: [] }
-  );
-
-  return (
-    <>
-      <Flex sx={{ px: 0, py: 0, justifyContent: "space-between" }}>
-        {titles}
-      </Flex>
-      <Flex sx={{ lineHeight: 1, pb: 3, justifyContent: "space-between" }}>
-        {amounts}
-      </Flex>
-    </>
-  );
-};
