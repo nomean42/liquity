@@ -9,8 +9,8 @@ type IProps = { lqtyStake: LQTYStake | any };
 export const GainsRow: React.FC<IProps> = ({ lqtyStake}) => (
     <>
       <Flex sx={{px: 0, py: 0, justifyContent: "space-between" }}>
-          <Label sx={{ fontSize: 1 }}>Redemption gain</Label>
-          <Label sx={{ fontSize: 1 }}>Issuance gain</Label>
+          <Label sx={{ py: 0, fontSize: 1 }}>Redemption gain</Label>
+          <Label sx={{ py: 0, fontSize: 1 }}>Issuance gain</Label>
       </Flex>
       <Flex sx={{ lineHeight: 1, pb: 3, justifyContent: "space-between" }} >
           <StaticAmounts
