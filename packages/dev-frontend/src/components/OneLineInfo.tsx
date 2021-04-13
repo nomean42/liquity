@@ -6,8 +6,9 @@ interface IInfoConfig {
   title: React.ReactNode | string;
   inputId: string;
   amount: string;
-  colorGetter: () => string;
-  unit: string;
+  colorGetter?: () => string | undefined;
+  labelledBy?: string;
+  unit?: string;
 }
 
 interface IProps {
@@ -27,13 +28,14 @@ const createInfoAmountElement = (
   inputId: IInfoConfig["inputId"],
   amount: IInfoConfig["amount"],
   colorGetter: IInfoConfig["colorGetter"],
+  labelledBy: IInfoConfig["labelledBy"],
   unit: IInfoConfig["unit"]
 ): React.ReactNode => (
   <StaticAmounts
     sx={{ pt: "0", pl: "2" }}
     inputId={inputId}
     amount={amount}
-    color={colorGetter()}
+    color={colorGetter?.()}
     unit={unit}
   />
 );
@@ -43,10 +45,10 @@ export const OneLineInfo: React.FC<IProps> = ({ infoElements }) => {
     titles: React.ReactNode[];
     amounts: React.ReactNode[];
   }>(
-    (acc, { title, inputId, amount, colorGetter, unit }) => {
+    (acc, { title, inputId, amount, colorGetter, labelledBy, unit }) => {
       acc.titles.push(createInfoTitleElement(title));
       acc.amounts.push(
-        createInfoAmountElement(inputId, amount, colorGetter, unit)
+        createInfoAmountElement(inputId, amount, colorGetter, labelledBy, unit)
       );
 
       return acc;

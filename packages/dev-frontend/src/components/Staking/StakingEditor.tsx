@@ -16,14 +16,14 @@ import {
 } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
-import { GT } from "../../strings";
+import { COIN, ETH, GT } from "../../strings";
 
 import { Icon } from "../Icon";
 import { Row, StaticAmounts } from "../Trove/Editor";
 import { LoadingOverlay } from "../LoadingOverlay";
 
 import { useStakingView } from "./context/StakingViewContext";
-import { GainsRow } from "./GainsRow";
+import { OneLineInfo } from "../OneLineInfo";
 
 const selectLQTYBalance = ({ lqtyBalance }: LiquityStoreState) => lqtyBalance;
 
@@ -218,7 +218,27 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
           />
         </Row>
 
-        {!originalStake.isEmpty && <GainsRow lqtyStake={originalStake} />}
+        {!originalStake.isEmpty && (
+          <OneLineInfo
+            infoElements={[
+              {
+                title: "Redemption gain",
+                inputId: "stake-gain-eth",
+                amount: originalStake.collateralGain.prettify(4),
+                colorGetter: () =>
+                  originalStake.collateralGain.nonZero && "success",
+                unit: ETH,
+              },
+              {
+                title: "Issuance gain",
+                inputId: "stake-gain-lusd",
+                amount: originalStake.lusdGain.prettify(),
+                colorGetter: () => originalStake.lusdGain.nonZero && "success",
+                unit: COIN,
+              },
+            ]}
+          />
+        )}
 
         {children}
       </Box>
