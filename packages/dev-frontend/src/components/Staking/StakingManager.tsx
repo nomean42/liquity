@@ -18,14 +18,11 @@ import {
 import { GT, COIN } from "../../strings";
 
 import { useStakingView } from "./context/StakingViewContext";
-import {
-  parseDecimalishToNumber,
-  prettifyNumber,
-  StakingEditor,
-} from "./StakingEditor";
+import { StakingEditor } from "./StakingEditor";
 import { StakingManagerAction } from "./StakingManagerAction";
 import { ActionDescription, Amount } from "../ActionDescription";
 import { ErrorDescription } from "../ErrorDescription";
+import {parseDecimalishToNumber, prettifyNumber} from "../../utils/number";
 
 const init = ({ lqtyStake }: LiquityStoreState) => ({
   originalStake: lqtyStake,

@@ -8,26 +8,20 @@ import {
   ThemeUICSSProperties,
 } from "theme-ui";
 
-import {
-  Decimal,
-  Decimalish,
-  LiquityStoreState,
-  LQTYStake,
-} from "@liquity/lib-base";
+import { Decimalish, LiquityStoreState, LQTYStake } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
-import { COIN, ETH, GT } from "../../strings";
+import { GT } from "../../strings";
 
 import { Icon } from "../Icon";
 import { Row, StaticAmounts } from "../Trove/Editor";
 import { LoadingOverlay } from "../LoadingOverlay";
-
 import { useStakingView } from "./context/StakingViewContext";
-import { OneLineInfo } from "../OneLineInfo";
+import { parseDecimalishToNumber, prettifyNumber } from "../../utils/number";
+import { StakingInfoLine } from "./StakingInfoLine";
 
-const select = ({ lqtyBalance, totalStakedLQTY }: LiquityStoreState) => ({
+const select = ({ lqtyBalance }: LiquityStoreState) => ({
   lqtyBalance,
-  totalStakedLQTY,
 });
 
 type StakingEditorProps = {
@@ -57,29 +51,6 @@ const editableStyle: ThemeUICSSProperties = {
   borderColor: "muted",
 };
 
-export const parseDecimalishToNumber = (decimalish: Decimalish): number => {
-  switch (typeof decimalish) {
-    case "number":
-      return decimalish;
-    case "string":
-      return parseFloat(decimalish);
-    default:
-      return parseFloat(Decimal.from(decimalish).toString());
-  }
-};
-export const prettifyNumber = (num: number): string => {
-  const normalizedNumber = Math.round(num * 100) / 100;
-  const [characteristic, mantissa] = String(normalizedNumber).split(".");
-  const prettyCharacteristic = characteristic.replace(
-    /(\d)(?=(\d{3})+(?!\d))/g,
-    "$1,"
-  );
-
-  return mantissa !== undefined
-    ? prettyCharacteristic + "." + mantissa + (mantissa.length === 1 ? "0" : "")
-    : prettyCharacteristic;
-};
-
 export const StakingEditor: React.FC<StakingEditorProps> = ({
   children,
   title,
@@ -87,7 +58,7 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
   editedLQTY,
   dispatch,
 }) => {
-  const { lqtyBalance, totalStakedLQTY } = useLiquitySelector(select);
+  const { lqtyBalance } = useLiquitySelector(select);
   const { changePending, kind } = useStakingView();
   const [invalid, setInvalid] = useState(false);
   const inputComponent = useRef(null);
@@ -127,14 +98,6 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
     },
     [setInputAmount, setInvalid]
   );
-
-  const originalPoolShare = parseDecimalishToNumber(
-    originalStake.stakedLQTY.mulDiv(100, totalStakedLQTY)
-  );
-  const newPoolShare =
-    (editedLQTYAmount * 100) / parseDecimalishToNumber(totalStakedLQTY);
-  const poolShareChange =
-    originalStake.stakedLQTY.nonZero && newPoolShare - originalPoolShare;
 
   useEffect(() => {
     if (!Number.isNaN(inputAmount)) {
@@ -230,43 +193,7 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
         </Row>
 
         {!originalStake.isEmpty && (
-          <OneLineInfo
-            infoElements={[
-              newPoolShare
-                ? {
-                    title: "Pool share",
-                    inputId: "stake-share",
-                    amount: prettifyNumber(newPoolShare),
-                    pendingAmount: poolShareChange
-                      ? prettifyNumber(poolShareChange) + "%"
-                      : undefined,
-                    pendingColor:
-                      poolShareChange && poolShareChange > 0
-                        ? "success"
-                        : "danger",
-                    unit: "%",
-                  }
-                : {
-                    title: "Pool share",
-                    inputId: "stake-share",
-                    amount: "N/A",
-                  },
-              {
-                title: "Redemption gain",
-                inputId: "stake-gain-eth",
-                amount: originalStake.collateralGain.prettify(4),
-                color: originalStake.collateralGain.nonZero && "success",
-                unit: ETH,
-              },
-              {
-                title: "Issuance gain",
-                inputId: "stake-gain-lusd",
-                amount: originalStake.lusdGain.prettify(),
-                color: originalStake.lusdGain.nonZero && "success",
-                unit: COIN,
-              },
-            ]}
-          />
+          <StakingInfoLine editedLQTYAmount={editedLQTYAmount} />
         )}
 
         {children}
