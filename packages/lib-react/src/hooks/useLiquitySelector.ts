@@ -5,7 +5,11 @@ import { LiquityStoreState } from "@liquity/lib-base";
 import { equals } from "../utils/equals";
 import { useLiquityStore } from "./useLiquityStore";
 
-export const useLiquitySelector = <S, T>(select: (state: LiquityStoreState<T>) => S): S => {
+export type ILiquitySelector<S, T = unknown> = (
+  state: LiquityStoreState<T>
+) => S;
+
+export const useLiquitySelector = <S, T>(select: ILiquitySelector<S, T>): S => {
   const store = useLiquityStore<T>();
   const [, rerender] = useReducer(() => ({}), {});
 
