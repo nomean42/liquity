@@ -8,7 +8,7 @@ import {
   ThemeUICSSProperties,
 } from "theme-ui";
 
-import { Decimalish, LiquityStoreState, LQTYStake } from "@liquity/lib-base";
+import { Decimal, LiquityStoreState, LQTYStake } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
 import { GT } from "../../strings";
@@ -17,7 +17,6 @@ import { Icon } from "../Icon";
 import { Row, StaticAmounts } from "../Trove/Editor";
 import { LoadingOverlay } from "../LoadingOverlay";
 import { useStakingView } from "./context/StakingViewContext";
-import { parseDecimalishToNumber, prettifyNumber } from "../../utils/number";
 import { StakingInfoLine } from "./StakingInfoLine";
 
 const select = ({ lqtyBalance }: LiquityStoreState) => ({
@@ -27,9 +26,9 @@ const select = ({ lqtyBalance }: LiquityStoreState) => ({
 type StakingEditorProps = {
   title: string;
   originalStake: LQTYStake;
-  editedLQTY: Decimalish;
+  editedLQTY: Decimal;
   dispatch: (
-    action: { type: "setStake"; newValue: Decimalish } | { type: "revert" }
+    action: { type: "setStake"; newValue: Decimal } | { type: "revert" }
   ) => void;
 };
 
@@ -65,35 +64,32 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
   const isKindStake = kind === "STAKE";
 
   const [editedLQTYAmount, setEditedLQTYAmount]: [
-    number,
-    (newValue: number) => void
+    Decimal,
+    (newValue: Decimal) => void
   ] = [
-    parseDecimalishToNumber(editedLQTY),
+    editedLQTY,
     useCallback(
-      (newValue: Decimalish) => dispatch({ type: "setStake", newValue }),
+      (newValue: Decimal) => dispatch({ type: "setStake", newValue }),
       [dispatch]
     ),
   ];
-  const [inputAmount, setInputAmount] = useState(NaN);
+  const [inputAmount, setInputAmount] = useState<Decimal | undefined>(
+    undefined
+  );
 
-  const maxAmount =
-    Math.floor(
-      parseDecimalishToNumber(
-        isKindStake ? lqtyBalance : originalStake.stakedLQTY
-      ) * 10e5
-    ) / 10e5;
+  const maxAmount = isKindStake ? lqtyBalance : originalStake.stakedLQTY;
   const maxedOut = isKindStake
-    ? editedLQTYAmount === maxAmount
-    : editedLQTYAmount === 0;
+    ? editedLQTYAmount.eq(maxAmount)
+    : editedLQTYAmount.isZero;
 
   const onInputChange = useCallback(
     ({ target: { value } }) => {
       const newValue = parseFloat(value);
-      const isInvalid = Number.isNaN(newValue) || newValue < 0 ;
-
+      const isInvalid = Number.isNaN(newValue) || newValue <= 0;
+      debugger;
       setInvalid(isInvalid || maxedOut);
       if (!isInvalid) {
-        setInputAmount(newValue);
+        setInputAmount(Decimal.from(newValue));
       }
     },
     [setInputAmount, setInvalid, maxedOut]
@@ -101,16 +97,18 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
 
   useEffect(() => {
     if (!Number.isNaN(inputAmount)) {
-      const stakedLQTY = parseDecimalishToNumber(originalStake.stakedLQTY);
+      const stakedLQTY = originalStake.stakedLQTY;
 
       setEditedLQTYAmount(
-        isKindStake ? stakedLQTY + inputAmount : stakedLQTY - inputAmount
+        isKindStake
+          ? stakedLQTY.add(Decimal.from(inputAmount || Decimal.ZERO))
+          : stakedLQTY.sub(Decimal.from(inputAmount || Decimal.ZERO))
       );
     }
   }, [inputAmount, isKindStake, originalStake.stakedLQTY, setEditedLQTYAmount]);
 
   useEffect(() => {
-    if (inputComponent.current && inputAmount <= maxAmount) {
+    if (inputComponent.current && inputAmount?.lte(maxAmount)) {
       ((inputComponent.current as unknown) as HTMLInputElement).value = inputAmount.toString();
     }
   }, [inputAmount, inputComponent, maxAmount]);
@@ -146,12 +144,17 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
               bg: "background",
             }}
             labelledBy={`${inputId}-label`}
-            amount={`${originalStake.stakedLQTY.prettify()} -> ${prettifyNumber(
-              editedLQTYAmount
-            )}`}
+            // amount={ -> }
+            amount={
+              <>
+                {`${originalStake.stakedLQTY.prettify()} `}
+                <Icon name="long-arrow-alt-right" size="sm" />
+                {` ${editedLQTYAmount.prettify()}`}
+              </>
+            }
             {...{ inputId, unit, invalid }}
           >
-            {maxAmount !== 0 && (
+            {!maxAmount.isZero && (
               <Button
                 sx={{ fontSize: 1, p: 1, px: 3 }}
                 onClick={(event) => {

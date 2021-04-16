@@ -16,7 +16,7 @@ interface IPoolShareStatus {
 
 export const usePoolShare = (
   selector: IPoolShareSelector,
-  editedLQTYAmount?: number
+  editedLQTYAmount?: Decimal
 ): IPoolShareStatus => {
   const { currentAmount, totalAmount } = useLiquitySelector(selector);
 
@@ -26,7 +26,7 @@ export const usePoolShare = (
     );
 
     const newPoolShareAmount = editedLQTYAmount
-      ? (editedLQTYAmount * 100) / parseDecimalishToNumber(totalAmount)
+      ? parseDecimalishToNumber(editedLQTYAmount.mulDiv(100, totalAmount))
       : currentPoolShareAmount;
 
     const poolShareChange =
@@ -34,7 +34,7 @@ export const usePoolShare = (
 
     return {
       poolShareAmount: newPoolShareAmount,
-      poolShareChange: poolShareChange !== 0 ? poolShareChange : undefined,
+      poolShareChange: poolShareChange,
     };
   }, [editedLQTYAmount, currentAmount, totalAmount]);
 };

@@ -1,6 +1,7 @@
+import { Decimal } from "@liquity/lib-base";
 import { usePoolShare } from "../../../hooks/usePoolShare";
 
-export const useStakingPoolShare = (editedLQTYAmount?: number) =>
+export const useStakingPoolShare = (editedLQTYAmount?: Decimal) =>
   usePoolShare(
     ({ lqtyStake, totalStakedLQTY }) => ({
       currentAmount: lqtyStake.stakedLQTY,

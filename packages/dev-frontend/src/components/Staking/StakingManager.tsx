@@ -3,7 +3,6 @@ import { Button, Flex } from "theme-ui";
 
 import {
   Decimal,
-  Decimalish,
   LiquityStoreState,
   LQTYStake,
   LQTYStakeChange,
@@ -22,26 +21,22 @@ import { StakingEditor } from "./StakingEditor";
 import { StakingManagerAction } from "./StakingManagerAction";
 import { ActionDescription, Amount } from "../ActionDescription";
 import { ErrorDescription } from "../ErrorDescription";
-import {parseDecimalishToNumber, prettifyNumber} from "../../utils/number";
 
 const init = ({ lqtyStake }: LiquityStoreState) => ({
   originalStake: lqtyStake,
-  editedLQTY: lqtyStake.stakedLQTY as Decimalish,
+  editedLQTY: lqtyStake.stakedLQTY,
 });
 
 type StakeManagerState = ReturnType<typeof init>;
 type StakeManagerAction =
   | LiquityStoreUpdate
   | { type: "revert" }
-  | { type: "setStake"; newValue: Decimalish };
+  | { type: "setStake"; newValue: Decimal };
 
 const reduce = (
   state: StakeManagerState,
   action: StakeManagerAction
 ): StakeManagerState => {
-  // console.log(state);
-  // console.log(action);
-
   const { originalStake, editedLQTY } = state;
 
   switch (action.type) {
@@ -49,7 +44,7 @@ const reduce = (
       return { ...state, editedLQTY: action.newValue };
 
     case "revert":
-      return { ...state, editedLQTY: 0 };
+      return { ...state, editedLQTY: Decimal.ZERO };
 
     case "updateStore": {
       const {
@@ -132,16 +127,14 @@ export const StakingManager: React.FC = () => {
     { originalStake, editedLQTY: editedLQTYOriginal },
     dispatch,
   ] = useLiquityReducer(reduce, init);
-  const editedLQTY = parseDecimalishToNumber(editedLQTYOriginal);
-  const stakedLQTY = parseDecimalishToNumber(originalStake.stakedLQTY);
-  const lqtyBalance = parseDecimalishToNumber(
-    useLiquitySelector(selectLQTYBalance)
-  );
+  const editedLQTY = Decimal.from(editedLQTYOriginal);
+  const stakedLQTY = originalStake.stakedLQTY;
+  const lqtyBalance = useLiquitySelector(selectLQTYBalance);
   const isStakeKind = kind === "STAKE";
 
   const editedDiffLQTY = isStakeKind
-    ? editedLQTY - stakedLQTY
-    : stakedLQTY - editedLQTY;
+    ? editedLQTY.sub(stakedLQTY)
+    : stakedLQTY.sub(editedLQTY);
 
   const getValidChange = (): [
     LQTYStakeChange<Decimal> | undefined,
@@ -155,26 +148,18 @@ export const StakingManager: React.FC = () => {
       return [undefined, undefined];
     }
 
-    if (isStakeKind && editedDiffLQTY > lqtyBalance) {
-      return [
-        undefined,
-        <ErrorDescription>
-          The amount you're trying to stake exceeds your balance by{" "}
-          <Amount>
-            {prettifyNumber(editedLQTY - stakedLQTY)} {GT}
-          </Amount>
-          .
-        </ErrorDescription>,
-      ];
-    }
+    const isStakeTooMuch = isStakeKind && editedDiffLQTY.gt(lqtyBalance);
+    const isWithdrawTooMuch = !isStakeKind && editedDiffLQTY.gt(stakedLQTY);
 
-    if (!isStakeKind && editedDiffLQTY > stakedLQTY) {
+    if (isStakeTooMuch || isWithdrawTooMuch) {
       return [
         undefined,
         <ErrorDescription>
-          The amount you're trying to withdraw exceeds your stake by{" "}
+          {`The amount you're trying to ${
+            isStakeKind ? "stake" : "withdraw"
+          } exceeds your ${isStakeKind ? "balance" : "stake"} by `}
           <Amount>
-            {prettifyNumber(editedDiffLQTY - stakedLQTY)} {GT}
+            {editedDiffLQTY.prettify()} {GT}
           </Amount>
           .
         </ErrorDescription>,
@@ -212,7 +197,7 @@ export const StakingManager: React.FC = () => {
           Cancel
         </Button>
 
-        {validChange && editedDiffLQTY !== 0 ? (
+        {validChange && !editedDiffLQTY.isZero ? (
           <StakingManagerAction change={validChange}>
             {actionTitle}
           </StakingManagerAction>

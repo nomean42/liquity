@@ -4,10 +4,10 @@ import { OneLineInfo } from "../OneLineInfo";
 import { prettifyNumber } from "../../utils/number";
 import { useStakingPoolShare } from "./hooks/useStakingPoolShare";
 import { useLiquitySelector } from "@liquity/lib-react";
-import { LiquityStoreState } from "@liquity/lib-base";
+import { Decimal, LiquityStoreState } from "@liquity/lib-base";
 
 interface IProps {
-  editedLQTYAmount?: number;
+  editedLQTYAmount?: Decimal;
 }
 
 const select = ({ lqtyStake }: LiquityStoreState) => ({
@@ -23,15 +23,14 @@ export const StakingInfoLine: React.FC<IProps> = ({ editedLQTYAmount }) => {
   return (
     <OneLineInfo
       infoElements={[
-        poolShareAmount !== 0
+        !lqtyStake.stakedLQTY.isZero
           ? {
               title: "Pool share",
               inputId: "stake-share",
               amount: prettifyNumber(poolShareAmount),
-              pendingAmount:
-                poolShareChange && poolShareChange !== 0
-                  ? prettifyNumber(poolShareChange) + "%"
-                  : undefined,
+              pendingAmount: poolShareChange
+                ? prettifyNumber(poolShareChange) + "%"
+                : undefined,
               pendingColor:
                 poolShareChange && poolShareChange > 0 ? "success" : "danger",
               unit: "%",
