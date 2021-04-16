@@ -89,14 +89,14 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
   const onInputChange = useCallback(
     ({ target: { value } }) => {
       const newValue = parseFloat(value);
-      const isInvalid = Number.isNaN(newValue) || newValue < 0;
+      const isInvalid = Number.isNaN(newValue) || newValue < 0 ;
 
-      setInvalid(isInvalid);
+      setInvalid(isInvalid || maxedOut);
       if (!isInvalid) {
         setInputAmount(newValue);
       }
     },
-    [setInputAmount, setInvalid]
+    [setInputAmount, setInvalid, maxedOut]
   );
 
   useEffect(() => {
@@ -110,10 +110,10 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
   }, [inputAmount, isKindStake, originalStake.stakedLQTY, setEditedLQTYAmount]);
 
   useEffect(() => {
-    if (inputComponent.current) {
+    if (inputComponent.current && inputAmount <= maxAmount) {
       ((inputComponent.current as unknown) as HTMLInputElement).value = inputAmount.toString();
     }
-  }, [inputAmount, inputComponent]);
+  }, [inputAmount, inputComponent, maxAmount]);
 
   useEffect(() => {
     if (inputComponent.current) {

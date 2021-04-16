@@ -26,7 +26,7 @@ const createInfoAmountElement = (
 export const OneLineInfo: React.FC<IProps> = ({ infoElements }) => (
   <Flex sx={{ p: 0, justifyContent: "space-between", alignItems: "center" }}>
     {infoElements.map(({ title, ...staticAmountProps }) => (
-      <Box sx={{ px: 2 }}>
+      <Box key={title?.toString()} sx={{ px: 2 }}>
         {createInfoTitleElement(title)}
         {createInfoAmountElement(staticAmountProps)}
       </Box>
