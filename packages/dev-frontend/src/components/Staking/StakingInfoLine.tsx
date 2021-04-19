@@ -1,5 +1,5 @@
 import React from "react";
-import { COIN, ETH } from "../../strings";
+import { Units } from "../../strings";
 import { OneLineInfo } from "../OneLineInfo";
 import { prettifyNumber } from "../../utils/number";
 import { useStakingPoolShare } from "./hooks/useStakingPoolShare";
@@ -33,7 +33,7 @@ export const StakingInfoLine: React.FC<IProps> = ({ editedLQTYAmount }) => {
                 : undefined,
               pendingColor:
                 poolShareChange && poolShareChange > 0 ? "success" : "danger",
-              unit: "%",
+              unit: Units.PERCENT,
             }
           : {
               title: "Pool share",
@@ -45,14 +45,14 @@ export const StakingInfoLine: React.FC<IProps> = ({ editedLQTYAmount }) => {
           inputId: "stake-gain-eth",
           amount: lqtyStake.collateralGain.prettify(4),
           color: lqtyStake.collateralGain.nonZero && "success",
-          unit: ETH,
+          unit: Units.ETH,
         },
         {
           title: "Issuance gain",
           inputId: "stake-gain-lusd",
           amount: lqtyStake.lusdGain.prettify(),
           color: lqtyStake.lusdGain.nonZero && "success",
-          unit: COIN,
+          unit: Units.COIN,
         },
       ]}
     />

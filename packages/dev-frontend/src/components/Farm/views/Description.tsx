@@ -1,7 +1,7 @@
 import React from "react";
 import { Text } from "theme-ui";
 import { useLiquity } from "../../../hooks/LiquityContext";
-import { LP } from "../../../strings";
+import { Units } from "../../../strings";
 import { Transaction } from "../../Transaction";
 import { Decimal } from "@liquity/lib-base";
 import { ActionDescription } from "../../ActionDescription";
@@ -15,14 +15,22 @@ const transactionId = "farm-stake";
 
 export const Description: React.FC<DescriptionProps> = ({ amount }) => {
   const {
-    liquity: { send: liquity }
+    liquity: { send: liquity },
   } = useLiquity();
-  const { isValid, hasApproved, isWithdrawing, amountChanged } = useValidationState(amount);
+  const {
+    isValid,
+    hasApproved,
+    isWithdrawing,
+    amountChanged,
+  } = useValidationState(amount);
 
   if (!hasApproved) {
     return (
       <ActionDescription>
-        <Text>To stake your {LP} tokens you need to allow Liquity to stake them for you</Text>
+        <Text>
+          To stake your {Units.LP} tokens you need to allow Liquity to
+          stake them for you
+        </Text>
       </ActionDescription>
     );
   }
@@ -34,16 +42,22 @@ export const Description: React.FC<DescriptionProps> = ({ amount }) => {
   return (
     <ActionDescription>
       {isWithdrawing && (
-        <Transaction id={transactionId} send={liquity.unstakeUniTokens.bind(liquity, amountChanged)}>
+        <Transaction
+          id={transactionId}
+          send={liquity.unstakeUniTokens.bind(liquity, amountChanged)}
+        >
           <Text>
-            You are unstaking {amountChanged.prettify(4)} {LP}
+            You are unstaking {amountChanged.prettify(4)} {Units.LP}
           </Text>
         </Transaction>
       )}
       {!isWithdrawing && (
-        <Transaction id={transactionId} send={liquity.stakeUniTokens.bind(liquity, amountChanged)}>
+        <Transaction
+          id={transactionId}
+          send={liquity.stakeUniTokens.bind(liquity, amountChanged)}
+        >
           <Text>
-            You are staking {amountChanged.prettify(4)} {LP}
+            You are staking {amountChanged.prettify(4)} {Units.LP}
           </Text>
         </Transaction>
       )}

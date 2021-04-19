@@ -10,6 +10,7 @@ import {
 } from "theme-ui";
 
 import { Icon } from "../Icon";
+import { Units } from "../../strings";
 
 type RowProps = SxProp & {
   label: string;
@@ -85,7 +86,7 @@ export type StaticAmountsProps = {
   inputId: string;
   labelledBy?: string;
   amount: string | React.ReactNode;
-  unit?: string;
+  unit?: Units;
   color?: string;
   pendingAmount?: string;
   pendingColor?: string;

@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { Heading, Box, Flex, Card, Button } from "theme-ui";
 import { Decimal } from "@liquity/lib-base";
-import { LP } from "../../../../strings";
+import { Units } from "../../../../strings";
 import { Icon } from "../../../Icon";
 import { EditableRow } from "../../../Trove/Editor";
 import { LoadingOverlay } from "../../../LoadingOverlay";
@@ -52,10 +52,10 @@ export const Staking: React.FC = () => {
           label="Stake"
           inputId="amount-lp"
           amount={amount.prettify(4)}
-          unit={LP}
+          unit={Units.LP}
           editingState={editingState}
           editedAmount={amount.toString(4)}
-          setEditedAmount={amount => setAmount(Decimal.from(amount))}
+          setEditedAmount={(amount) => setAmount(Decimal.from(amount))}
           maxAmount={maximumStake.toString()}
           maxedOut={hasSetMaximumStake}
         ></EditableRow>

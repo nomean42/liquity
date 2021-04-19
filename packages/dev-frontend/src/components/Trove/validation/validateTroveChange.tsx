@@ -9,10 +9,10 @@ import {
   CRITICAL_COLLATERAL_RATIO,
   LiquityStoreState,
   TroveClosureParams,
-  TroveCreationParams
+  TroveCreationParams,
 } from "@liquity/lib-base";
 
-import { COIN } from "../../../strings";
+import { Units } from "../../../strings";
 
 import { ActionDescription, Amount } from "../../ActionDescription";
 import { ErrorDescription } from "../../ErrorDescription";
@@ -24,57 +24,64 @@ type TroveAdjustmentDescriptionParams = {
   params: TroveAdjustmentParams<Decimal>;
 };
 
-const TroveChangeDescription: React.FC<TroveAdjustmentDescriptionParams> = ({ params }) => (
+const TroveChangeDescription: React.FC<TroveAdjustmentDescriptionParams> = ({
+  params,
+}) => (
   <ActionDescription>
     {params.depositCollateral && params.borrowLUSD ? (
       <>
-        You will deposit <Amount>{params.depositCollateral.prettify()} ETH</Amount> and receive{" "}
+        You will deposit{" "}
+        <Amount>{params.depositCollateral.prettify()} ETH</Amount> and receive{" "}
         <Amount>
-          {params.borrowLUSD.prettify()} {COIN}
+          {params.borrowLUSD.prettify()} {Units.COIN}
         </Amount>
       </>
     ) : params.repayLUSD && params.withdrawCollateral ? (
       <>
         You will pay{" "}
         <Amount>
-          {params.repayLUSD.prettify()} {COIN}
+          {params.repayLUSD.prettify()} {Units.COIN}
         </Amount>{" "}
         and receive <Amount>{params.withdrawCollateral.prettify()} ETH</Amount>
       </>
     ) : params.depositCollateral && params.repayLUSD ? (
       <>
-        You will deposit <Amount>{params.depositCollateral.prettify()} ETH</Amount> and pay{" "}
+        You will deposit{" "}
+        <Amount>{params.depositCollateral.prettify()} ETH</Amount> and pay{" "}
         <Amount>
-          {params.repayLUSD.prettify()} {COIN}
+          {params.repayLUSD.prettify()} {Units.COIN}
         </Amount>
       </>
     ) : params.borrowLUSD && params.withdrawCollateral ? (
       <>
-        You will receive <Amount>{params.withdrawCollateral.prettify()} ETH</Amount> and{" "}
+        You will receive{" "}
+        <Amount>{params.withdrawCollateral.prettify()} ETH</Amount> and{" "}
         <Amount>
-          {params.borrowLUSD.prettify()} {COIN}
+          {params.borrowLUSD.prettify()} {Units.COIN}
         </Amount>
       </>
     ) : params.depositCollateral ? (
       <>
-        You will deposit <Amount>{params.depositCollateral.prettify()} ETH</Amount>
+        You will deposit{" "}
+        <Amount>{params.depositCollateral.prettify()} ETH</Amount>
       </>
     ) : params.withdrawCollateral ? (
       <>
-        You will receive <Amount>{params.withdrawCollateral.prettify()} ETH</Amount>
+        You will receive{" "}
+        <Amount>{params.withdrawCollateral.prettify()} ETH</Amount>
       </>
     ) : params.borrowLUSD ? (
       <>
         You will receive{" "}
         <Amount>
-          {params.borrowLUSD.prettify()} {COIN}
+          {params.borrowLUSD.prettify()} {Units.COIN}
         </Amount>
       </>
     ) : (
       <>
         You will pay{" "}
         <Amount>
-          {params.repayLUSD.prettify()} {COIN}
+          {params.repayLUSD.prettify()} {Units.COIN}
         </Amount>
       </>
     )}
@@ -87,12 +94,21 @@ export const selectForTroveChangeValidation = ({
   total,
   accountBalance,
   lusdBalance,
-  numberOfTroves
-}: LiquityStoreState) => ({ price, total, accountBalance, lusdBalance, numberOfTroves });
+  numberOfTroves,
+}: LiquityStoreState) => ({
+  price,
+  total,
+  accountBalance,
+  lusdBalance,
+  numberOfTroves,
+});
 
-type TroveChangeValidationSelectedState = ReturnType<typeof selectForTroveChangeValidation>;
+type TroveChangeValidationSelectedState = ReturnType<
+  typeof selectForTroveChangeValidation
+>;
 
-interface TroveChangeValidationContext extends TroveChangeValidationSelectedState {
+interface TroveChangeValidationContext
+  extends TroveChangeValidationSelectedState {
   originalTrove: Trove;
   resultingTrove: Trove;
   recoveryMode: boolean;
@@ -105,7 +121,9 @@ export const validateTroveChange = (
   borrowingRate: Decimal,
   selectedState: TroveChangeValidationSelectedState
 ): [
-  validChange: Exclude<TroveChange<Decimal>, { type: "invalidCreation" }> | undefined,
+  validChange:
+    | Exclude<TroveChange<Decimal>, { type: "invalidCreation" }>
+    | undefined,
   description: JSX.Element | undefined
 ] => {
   const { total, price } = selectedState;
@@ -129,7 +147,7 @@ export const validateTroveChange = (
     originalTrove,
     resultingTrove,
     recoveryMode,
-    wouldTriggerRecoveryMode
+    wouldTriggerRecoveryMode,
   };
 
   if (change.type === "invalidCreation") {
@@ -139,10 +157,10 @@ export const validateTroveChange = (
       <ErrorDescription>
         Debt must be at least{" "}
         <Amount>
-          {LUSD_MINIMUM_DEBT.toString()} {COIN}
+          {LUSD_MINIMUM_DEBT.toString()} {Units.COIN}
         </Amount>
         .
-      </ErrorDescription>
+      </ErrorDescription>,
     ];
   }
 
@@ -167,7 +185,7 @@ const validateTroveCreation = (
     recoveryMode,
     wouldTriggerRecoveryMode,
     accountBalance,
-    price
+    price,
   }: TroveChangeValidationContext
 ): JSX.Element | null => {
   if (resultingTrove.debt.lt(LUSD_MINIMUM_DEBT)) {
@@ -175,7 +193,7 @@ const validateTroveCreation = (
       <ErrorDescription>
         Debt must be at least{" "}
         <Amount>
-          {LUSD_MINIMUM_DEBT.toString()} {COIN}
+          {LUSD_MINIMUM_DEBT.toString()} {Units.COIN}
         </Amount>
         .
       </ErrorDescription>
@@ -186,8 +204,9 @@ const validateTroveCreation = (
     if (!resultingTrove.isOpenableInRecoveryMode(price)) {
       return (
         <ErrorDescription>
-          You're not allowed to open a Trove with less than <Amount>{ccrPercent}</Amount> Collateral
-          Ratio during recovery mode. Please increase your Trove's Collateral Ratio.
+          You're not allowed to open a Trove with less than{" "}
+          <Amount>{ccrPercent}</Amount> Collateral Ratio during recovery mode.
+          Please increase your Trove's Collateral Ratio.
         </ErrorDescription>
       );
     }
@@ -203,8 +222,9 @@ const validateTroveCreation = (
     if (wouldTriggerRecoveryMode) {
       return (
         <ErrorDescription>
-          You're not allowed to open a Trove that would cause the Total Collateral Ratio to fall
-          below <Amount>{ccrPercent}</Amount>. Please increase your Trove's Collateral Ratio.
+          You're not allowed to open a Trove that would cause the Total
+          Collateral Ratio to fall below <Amount>{ccrPercent}</Amount>. Please
+          increase your Trove's Collateral Ratio.
         </ErrorDescription>
       );
     }
@@ -223,7 +243,12 @@ const validateTroveCreation = (
 };
 
 const validateTroveAdjustment = (
-  { depositCollateral, withdrawCollateral, borrowLUSD, repayLUSD }: TroveAdjustmentParams<Decimal>,
+  {
+    depositCollateral,
+    withdrawCollateral,
+    borrowLUSD,
+    repayLUSD,
+  }: TroveAdjustmentParams<Decimal>,
   {
     originalTrove,
     resultingTrove,
@@ -231,7 +256,7 @@ const validateTroveAdjustment = (
     wouldTriggerRecoveryMode,
     price,
     accountBalance,
-    lusdBalance
+    lusdBalance,
   }: TroveChangeValidationContext
 ): JSX.Element | null => {
   if (recoveryMode) {
@@ -247,16 +272,22 @@ const validateTroveAdjustment = (
       if (resultingTrove.collateralRatioIsBelowCritical(price)) {
         return (
           <ErrorDescription>
-            Your collateral ratio must be at least <Amount>{ccrPercent}</Amount> to borrow during
-            recovery mode. Please improve your collateral ratio.
+            Your collateral ratio must be at least <Amount>{ccrPercent}</Amount>{" "}
+            to borrow during recovery mode. Please improve your collateral
+            ratio.
           </ErrorDescription>
         );
       }
 
-      if (resultingTrove.collateralRatio(price).lt(originalTrove.collateralRatio(price))) {
+      if (
+        resultingTrove
+          .collateralRatio(price)
+          .lt(originalTrove.collateralRatio(price))
+      ) {
         return (
           <ErrorDescription>
-            You're not allowed to decrease your collateral ratio during recovery mode.
+            You're not allowed to decrease your collateral ratio during recovery
+            mode.
           </ErrorDescription>
         );
       }
@@ -273,8 +304,9 @@ const validateTroveAdjustment = (
     if (wouldTriggerRecoveryMode) {
       return (
         <ErrorDescription>
-          The adjustment you're trying to make would cause the Total Collateral Ratio to fall below{" "}
-          <Amount>{ccrPercent}</Amount>. Please increase your Trove's Collateral Ratio.
+          The adjustment you're trying to make would cause the Total Collateral
+          Ratio to fall below <Amount>{ccrPercent}</Amount>. Please increase
+          your Trove's Collateral Ratio.
         </ErrorDescription>
       );
     }
@@ -286,7 +318,7 @@ const validateTroveAdjustment = (
         <ErrorDescription>
           Debt must be at least{" "}
           <Amount>
-            {LUSD_MINIMUM_DEBT.toString()} {COIN}
+            {LUSD_MINIMUM_DEBT.toString()} {Units.COIN}
           </Amount>
           .
         </ErrorDescription>
@@ -298,7 +330,7 @@ const validateTroveAdjustment = (
         <ErrorDescription>
           The amount you're trying to repay exceeds your balance by{" "}
           <Amount>
-            {repayLUSD.sub(lusdBalance).prettify()} {COIN}
+            {repayLUSD.sub(lusdBalance).prettify()} {Units.COIN}
           </Amount>
           .
         </ErrorDescription>
@@ -324,13 +356,14 @@ const validateTroveClosure = (
     recoveryMode,
     wouldTriggerRecoveryMode,
     numberOfTroves,
-    lusdBalance
+    lusdBalance,
   }: TroveChangeValidationContext
 ): JSX.Element | null => {
   if (numberOfTroves === 1) {
     return (
       <ErrorDescription>
-        You're not allowed to close your Trove when there are no other Troves in the system.
+        You're not allowed to close your Trove when there are no other Troves in
+        the system.
       </ErrorDescription>
     );
   }
@@ -348,7 +381,7 @@ const validateTroveClosure = (
       <ErrorDescription>
         You need{" "}
         <Amount>
-          {repayLUSD.sub(lusdBalance).prettify()} {COIN}
+          {repayLUSD.sub(lusdBalance).prettify()} {Units.COIN}
         </Amount>{" "}
         more to close your Trove.
       </ErrorDescription>
@@ -358,9 +391,9 @@ const validateTroveClosure = (
   if (wouldTriggerRecoveryMode) {
     return (
       <ErrorDescription>
-        You're not allowed to close a Trove if it would cause the Total Collateralization Ratio to
-        fall below <Amount>{ccrPercent}</Amount>. Please wait until the Total Collateral Ratio
-        increases.
+        You're not allowed to close a Trove if it would cause the Total
+        Collateralization Ratio to fall below <Amount>{ccrPercent}</Amount>.
+        Please wait until the Total Collateral Ratio increases.
       </ErrorDescription>
     );
   }

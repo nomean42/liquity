@@ -3,7 +3,7 @@ import { Heading, Box, Flex, Card, Button } from "theme-ui";
 import { Decimal, LiquityStoreState } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
-import { LP, GT } from "../../../../strings";
+import { Units } from "../../../../strings";
 import { Icon } from "../../../Icon";
 import { EditableRow, StaticRow } from "../../../Trove/Editor";
 import { LoadingOverlay } from "../../../LoadingOverlay";
@@ -17,20 +17,22 @@ import { Validation } from "../Validation";
 const selector = ({
   liquidityMiningStake,
   liquidityMiningLQTYReward,
-  uniTokenBalance
+  uniTokenBalance,
 }: LiquityStoreState) => ({
   liquidityMiningStake,
   liquidityMiningLQTYReward,
-  uniTokenBalance
+  uniTokenBalance,
 });
 
 const transactionId = /farm-/;
 
 export const Adjusting: React.FC = () => {
   const { dispatchEvent } = useFarmView();
-  const { liquidityMiningStake, liquidityMiningLQTYReward, uniTokenBalance } = useLiquitySelector(
-    selector
-  );
+  const {
+    liquidityMiningStake,
+    liquidityMiningLQTYReward,
+    uniTokenBalance,
+  } = useLiquitySelector(selector);
   const [amount, setAmount] = useState<Decimal>(liquidityMiningStake);
   const editingState = useState<string>();
 
@@ -65,11 +67,13 @@ export const Adjusting: React.FC = () => {
         <EditableRow
           label="Stake"
           inputId="farm-stake-amount"
-          amount={isDirty ? amount.prettify(4) : liquidityMiningStake.prettify(4)}
-          unit={LP}
+          amount={
+            isDirty ? amount.prettify(4) : liquidityMiningStake.prettify(4)
+          }
+          unit={Units.LP}
           editingState={editingState}
           editedAmount={amount.toString(4)}
-          setEditedAmount={amount => setAmount(Decimal.from(amount))}
+          setEditedAmount={(amount) => setAmount(Decimal.from(amount))}
           maxAmount={maximumAmount.toString()}
           maxedOut={hasSetMaximumAmount}
         ></EditableRow>
@@ -79,7 +83,7 @@ export const Adjusting: React.FC = () => {
           inputId="farm-reward-amount"
           amount={liquidityMiningLQTYReward.prettify(4)}
           color={liquidityMiningLQTYReward.nonZero && "success"}
-          unit={GT}
+          unit={Units.GT}
         />
 
         {isDirty && <Validation amount={amount} />}

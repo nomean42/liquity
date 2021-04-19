@@ -14,7 +14,7 @@ import {
   useLiquitySelector,
 } from "@liquity/lib-react";
 
-import { GT, COIN } from "../../strings";
+import { Units } from "../../strings";
 
 import { useStakingView } from "./context/StakingViewContext";
 import { StakingEditor } from "./StakingEditor";
@@ -74,12 +74,14 @@ const StakingManagerActionDescription: React.FC<StakingManagerActionDescriptionP
   originalStake,
   change,
 }) => {
-  const stakeLQTY = change.stakeLQTY?.prettify().concat(" ", GT);
-  const unstakeLQTY = change.unstakeLQTY?.prettify().concat(" ", GT);
+  const stakeLQTY = change.stakeLQTY?.prettify().concat(" ", Units.GT);
+  const unstakeLQTY = change.unstakeLQTY?.prettify().concat(" ", Units.GT);
   const collateralGain = originalStake.collateralGain.nonZero
     ?.prettify(4)
     .concat(" ETH");
-  const lusdGain = originalStake.lusdGain.nonZero?.prettify().concat(" ", COIN);
+  const lusdGain = originalStake.lusdGain.nonZero
+    ?.prettify()
+    .concat(" ", Units.COIN);
 
   if (originalStake.isEmpty && stakeLQTY) {
     return (
@@ -159,7 +161,7 @@ export const StakingManager: React.FC = () => {
             isStakeKind ? "stake" : "withdraw"
           } exceeds your ${isStakeKind ? "balance" : "stake"} by `}
           <Amount>
-            {editedDiffLQTY.prettify()} {GT}
+            {editedDiffLQTY.prettify()} {Units.GT}
           </Amount>
           .
         </ErrorDescription>,
@@ -179,14 +181,8 @@ export const StakingManager: React.FC = () => {
   const actionTitle = isStakeKind ? "Stake" : "Withdraw";
 
   return (
-    <StakingEditor title="Staking" {...{ originalStake, editedLQTY, dispatch }}>
-      {description ?? (
-        <ActionDescription>
-          Enter the amount of {GT} you'd like{" "}
-          {isStakeKind ? "stake" : "withdraw"}.
-        </ActionDescription>
-      )}
-
+    <StakingEditor {...{ originalStake, editedLQTY, dispatch }}>
+      {description}
       <Flex variant="layout.actions">
         <Button
           variant="cancel"

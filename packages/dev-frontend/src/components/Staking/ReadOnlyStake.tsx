@@ -3,7 +3,7 @@ import { Heading, Box, Card, Flex, Button } from "theme-ui";
 import { LiquityStoreState } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
-import { GT } from "../../strings";
+import { Units } from "../../strings";
 
 import { DisabledEditableRow } from "../Trove/Editor";
 import { LoadingOverlay } from "../LoadingOverlay";
@@ -28,7 +28,7 @@ export const ReadOnlyStake: React.FC = () => {
           label="Stake"
           inputId="stake-lqty"
           amount={lqtyStake.stakedLQTY.prettify()}
-          unit={GT}
+          unit={Units.GT}
         />
         <StakingInfoLine />
         <Flex variant="layout.actions" sx={{ justifyContent: "space-between" }}>

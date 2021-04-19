@@ -1,11 +1,16 @@
 import React, { useState } from "react";
 import { Heading, Box, Card, Button } from "theme-ui";
 
-import { Decimal, Decimalish, StabilityDeposit, LiquityStoreState } from "@liquity/lib-base";
+import {
+  Decimal,
+  Decimalish,
+  StabilityDeposit,
+  LiquityStoreState,
+} from "@liquity/lib-base";
 
 import { useLiquitySelector } from "@liquity/lib-react";
 
-import { COIN, GT } from "../../strings";
+import { Units } from "../../strings";
 
 import { Icon } from "../Icon";
 import { EditableRow, StaticRow } from "../Trove/Editor";
@@ -18,7 +23,9 @@ type StabilityDepositEditorProps = {
   originalDeposit: StabilityDeposit;
   editedLUSD: Decimal;
   changePending: boolean;
-  dispatch: (action: { type: "setDeposit"; newValue: Decimalish } | { type: "revert" }) => void;
+  dispatch: (
+    action: { type: "setDeposit"; newValue: Decimalish } | { type: "revert" }
+  ) => void;
 };
 
 export const StabilityDepositEditor: React.FC<StabilityDepositEditorProps> = ({
@@ -26,7 +33,7 @@ export const StabilityDepositEditor: React.FC<StabilityDepositEditorProps> = ({
   editedLUSD,
   changePending,
   dispatch,
-  children
+  children,
 }) => {
   const lusdBalance = useLiquitySelector(selectLUSDBalance);
   const editingState = useState<string>();
@@ -58,10 +65,12 @@ export const StabilityDepositEditor: React.FC<StabilityDepositEditorProps> = ({
           amount={editedLUSD.prettify()}
           maxAmount={maxAmount.toString()}
           maxedOut={maxedOut}
-          unit={COIN}
+          unit={Units.COIN}
           {...{ editingState }}
           editedAmount={editedLUSD.toString(2)}
-          setEditedAmount={newValue => dispatch({ type: "setDeposit", newValue })}
+          setEditedAmount={(newValue) =>
+            dispatch({ type: "setDeposit", newValue })
+          }
         />
 
         {!originalDeposit.isEmpty && (
@@ -71,7 +80,7 @@ export const StabilityDepositEditor: React.FC<StabilityDepositEditorProps> = ({
               inputId="deposit-gain"
               amount={originalDeposit.collateralGain.prettify(4)}
               color={originalDeposit.collateralGain.nonZero && "success"}
-              unit="ETH"
+              unit={Units.ETH}
             />
 
             <StaticRow
@@ -79,14 +88,15 @@ export const StabilityDepositEditor: React.FC<StabilityDepositEditorProps> = ({
               inputId="deposit-reward"
               amount={originalDeposit.lqtyReward.prettify()}
               color={originalDeposit.lqtyReward.nonZero && "success"}
-              unit={GT}
+              unit={Units.GT}
               infoIcon={
                 <InfoIcon
                   tooltip={
                     <Card variant="tooltip" sx={{ width: "240px" }}>
-                      Although the LQTY rewards accrue every minute, the value on the UI only updates
-                      when a user transacts with the Stability Pool. Therefore you may receive more
-                      rewards than is displayed when you claim or adjust your deposit.
+                      Although the LQTY rewards accrue every minute, the value
+                      on the UI only updates when a user transacts with the
+                      Stability Pool. Therefore you may receive more rewards
+                      than is displayed when you claim or adjust your deposit.
                     </Card>
                   }
                 />

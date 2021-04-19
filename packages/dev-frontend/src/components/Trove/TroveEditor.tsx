@@ -8,11 +8,11 @@ import {
   Decimal,
   Trove,
   LiquityStoreState,
-  LUSD_LIQUIDATION_RESERVE
+  LUSD_LIQUIDATION_RESERVE,
 } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
-import { COIN } from "../../strings";
+import { Units } from "../../strings";
 
 import { Icon } from "../Icon";
 import { EditableRow, StaticRow } from "./Editor";
@@ -29,11 +29,16 @@ type TroveEditorProps = {
   borrowingRate: Decimal;
   changePending: boolean;
   dispatch: (
-    action: { type: "setCollateral" | "setDebt"; newValue: Decimalish } | { type: "revert" }
+    action:
+      | { type: "setCollateral" | "setDebt"; newValue: Decimalish }
+      | { type: "revert" }
   ) => void;
 };
 
-const select = ({ price, accountBalance }: LiquityStoreState) => ({ price, accountBalance });
+const select = ({ price, accountBalance }: LiquityStoreState) => ({
+  price,
+  accountBalance,
+});
 
 export const TroveEditor: React.FC<TroveEditorProps> = ({
   children,
@@ -42,7 +47,7 @@ export const TroveEditor: React.FC<TroveEditorProps> = ({
   fee,
   borrowingRate,
   changePending,
-  dispatch
+  dispatch,
 }) => {
   const { price, accountBalance } = useLiquitySelector(select);
 
@@ -50,11 +55,20 @@ export const TroveEditor: React.FC<TroveEditorProps> = ({
 
   const feePct = new Percent(borrowingRate);
 
-  const originalCollateralRatio = !original.isEmpty ? original.collateralRatio(price) : undefined;
-  const collateralRatio = !edited.isEmpty ? edited.collateralRatio(price) : undefined;
-  const collateralRatioChange = Difference.between(collateralRatio, originalCollateralRatio);
+  const originalCollateralRatio = !original.isEmpty
+    ? original.collateralRatio(price)
+    : undefined;
+  const collateralRatio = !edited.isEmpty
+    ? edited.collateralRatio(price)
+    : undefined;
+  const collateralRatioChange = Difference.between(
+    collateralRatio,
+    originalCollateralRatio
+  );
 
-  const maxEth = accountBalance.gt(gasRoomETH) ? accountBalance.sub(gasRoomETH) : Decimal.ZERO;
+  const maxEth = accountBalance.gt(gasRoomETH)
+    ? accountBalance.sub(gasRoomETH)
+    : Decimal.ZERO;
   const maxCollateral = original.collateral.add(maxEth);
   const collateralMaxedOut = edited.collateral.eq(maxCollateral);
 
@@ -82,7 +96,7 @@ export const TroveEditor: React.FC<TroveEditorProps> = ({
           amount={edited.collateral.prettify(4)}
           maxAmount={maxCollateral.toString()}
           maxedOut={collateralMaxedOut}
-          unit="ETH"
+          unit={Units.ETH}
           {...{ editingState }}
           editedAmount={edited.collateral.toString(4)}
           setEditedAmount={(editedCollateral: string) =>
@@ -94,7 +108,7 @@ export const TroveEditor: React.FC<TroveEditorProps> = ({
           label="Debt"
           inputId="trove-debt"
           amount={edited.debt.prettify()}
-          unit={COIN}
+          unit={Units.COIN}
           {...{ editingState }}
           editedAmount={edited.debt.toString(2)}
           setEditedAmount={(editedDebt: string) =>
@@ -107,14 +121,15 @@ export const TroveEditor: React.FC<TroveEditorProps> = ({
             label="Liquidation Reserve"
             inputId="trove-liquidation-reserve"
             amount={`${LUSD_LIQUIDATION_RESERVE}`}
-            unit={COIN}
+            unit={Units.COIN}
             infoIcon={
               <InfoIcon
                 tooltip={
                   <Card variant="tooltip" sx={{ width: "200px" }}>
-                    An amount set aside to cover the liquidator’s gas costs if your Trove needs to be
-                    liquidated. The amount increases your debt and is refunded if you close your
-                    Trove by fully paying off its net debt.
+                    An amount set aside to cover the liquidator’s gas costs if
+                    your Trove needs to be liquidated. The amount increases your
+                    debt and is refunded if you close your Trove by fully paying
+                    off its net debt.
                   </Card>
                 }
               />
@@ -127,20 +142,24 @@ export const TroveEditor: React.FC<TroveEditorProps> = ({
           inputId="trove-borrowing-fee"
           amount={fee.toString(2)}
           pendingAmount={feePct.toString(2)}
-          unit={COIN}
+          unit={Units.COIN}
           infoIcon={
             <InfoIcon
               tooltip={
                 <Card variant="tooltip" sx={{ width: "240px" }}>
-                  This amount is deducted from the borrowed amount as a one-time fee. There are no
-                  recurring fees for borrowing, which is thus interest-free.
+                  This amount is deducted from the borrowed amount as a one-time
+                  fee. There are no recurring fees for borrowing, which is thus
+                  interest-free.
                 </Card>
               }
             />
           }
         />
 
-        <CollateralRatio value={collateralRatio} change={collateralRatioChange} />
+        <CollateralRatio
+          value={collateralRatio}
+          change={collateralRatioChange}
+        />
 
         {children}
       </Box>

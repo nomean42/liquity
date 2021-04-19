@@ -2,10 +2,10 @@ import {
   Decimal,
   LiquityStoreState,
   StabilityDeposit,
-  StabilityDepositChange
+  StabilityDepositChange,
 } from "@liquity/lib-base";
 
-import { COIN } from "../../../strings";
+import { Units } from "../../../strings";
 import { Amount } from "../../ActionDescription";
 import { ErrorDescription } from "../../ErrorDescription";
 import { StabilityActionDescription } from "../StabilityActionDescription";
@@ -14,12 +14,12 @@ export const selectForStabilityDepositChangeValidation = ({
   trove,
   lusdBalance,
   ownFrontend,
-  haveUndercollateralizedTroves
+  haveUndercollateralizedTroves,
 }: LiquityStoreState) => ({
   trove,
   lusdBalance,
   haveOwnFrontend: ownFrontend.status === "registered",
-  haveUndercollateralizedTroves
+  haveUndercollateralizedTroves,
 });
 
 type StabilityDepositChangeValidationContext = ReturnType<
@@ -32,7 +32,7 @@ export const validateStabilityDepositChange = (
   {
     lusdBalance,
     haveOwnFrontend,
-    haveUndercollateralizedTroves
+    haveUndercollateralizedTroves,
   }: StabilityDepositChangeValidationContext
 ): [
   validChange: StabilityDepositChange<Decimal> | undefined,
@@ -44,8 +44,9 @@ export const validateStabilityDepositChange = (
     return [
       undefined,
       <ErrorDescription>
-        You can’t deposit using a wallet address that is registered as a frontend.
-      </ErrorDescription>
+        You can’t deposit using a wallet address that is registered as a
+        frontend.
+      </ErrorDescription>,
     ];
   }
 
@@ -59,10 +60,10 @@ export const validateStabilityDepositChange = (
       <ErrorDescription>
         The amount you're trying to deposit exceeds your balance by{" "}
         <Amount>
-          {change.depositLUSD.sub(lusdBalance).prettify()} {COIN}
+          {change.depositLUSD.sub(lusdBalance).prettify()} {Units.COIN}
         </Amount>
         .
-      </ErrorDescription>
+      </ErrorDescription>,
     ];
   }
 
@@ -70,11 +71,18 @@ export const validateStabilityDepositChange = (
     return [
       undefined,
       <ErrorDescription>
-        You're not allowed to withdraw LUSD from your Stability Deposit when there are
-        undercollateralized Troves. Please liquidate those Troves or try again later.
-      </ErrorDescription>
+        You're not allowed to withdraw LUSD from your Stability Deposit when
+        there are undercollateralized Troves. Please liquidate those Troves or
+        try again later.
+      </ErrorDescription>,
     ];
   }
 
-  return [change, <StabilityActionDescription originalDeposit={originalDeposit} change={change} />];
+  return [
+    change,
+    <StabilityActionDescription
+      originalDeposit={originalDeposit}
+      change={change}
+    />,
+  ];
 };

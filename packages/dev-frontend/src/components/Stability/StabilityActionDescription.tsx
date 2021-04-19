@@ -1,8 +1,12 @@
 import React from "react";
 
-import { Decimal, StabilityDeposit, StabilityDepositChange } from "@liquity/lib-base";
+import {
+  Decimal,
+  StabilityDeposit,
+  StabilityDepositChange,
+} from "@liquity/lib-base";
 
-import { COIN, GT } from "../../strings";
+import { Units } from "../../strings";
 import { ActionDescription, Amount } from "../ActionDescription";
 
 type StabilityActionDescriptionProps = {
@@ -12,10 +16,14 @@ type StabilityActionDescriptionProps = {
 
 export const StabilityActionDescription: React.FC<StabilityActionDescriptionProps> = ({
   originalDeposit,
-  change
+  change,
 }) => {
-  const collateralGain = originalDeposit.collateralGain.nonZero?.prettify(4).concat(" ETH");
-  const lqtyReward = originalDeposit.lqtyReward.nonZero?.prettify().concat(" ", GT);
+  const collateralGain = originalDeposit.collateralGain.nonZero
+    ?.prettify(4)
+    .concat(" ", Units.ETH);
+  const lqtyReward = originalDeposit.lqtyReward.nonZero
+    ?.prettify()
+    .concat(" ", Units.GT);
 
   return (
     <ActionDescription>
@@ -23,7 +31,7 @@ export const StabilityActionDescription: React.FC<StabilityActionDescriptionProp
         <>
           You are depositing{" "}
           <Amount>
-            {change.depositLUSD.prettify()} {COIN}
+            {change.depositLUSD.prettify()} {Units.COIN}
           </Amount>{" "}
           in the Stability Pool
         </>
@@ -31,7 +39,7 @@ export const StabilityActionDescription: React.FC<StabilityActionDescriptionProp
         <>
           You are withdrawing{" "}
           <Amount>
-            {change.withdrawLUSD.prettify()} {COIN}
+            {change.withdrawLUSD.prettify()} {Units.COIN}
           </Amount>{" "}
           to your wallet
         </>
@@ -42,7 +50,8 @@ export const StabilityActionDescription: React.FC<StabilityActionDescriptionProp
           and claiming at least{" "}
           {collateralGain && lqtyReward ? (
             <>
-              <Amount>{collateralGain}</Amount> and <Amount>{lqtyReward}</Amount>
+              <Amount>{collateralGain}</Amount> and{" "}
+              <Amount>{lqtyReward}</Amount>
             </>
           ) : (
             <Amount>{collateralGain ?? lqtyReward}</Amount>

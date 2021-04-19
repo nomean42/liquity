@@ -6,15 +6,21 @@ import { InfoMessage } from "../../../InfoMessage";
 import { UnstakeAndClaim } from "../UnstakeAndClaim";
 import { RemainingLQTY } from "../RemainingLQTY";
 import { StaticRow } from "../../../Trove/Editor";
-import { GT, LP } from "../../../../strings";
+import { Units } from "../../../../strings";
 
-const selector = ({ liquidityMiningStake, liquidityMiningLQTYReward }: LiquityStoreState) => ({
+const selector = ({
   liquidityMiningStake,
-  liquidityMiningLQTYReward
+  liquidityMiningLQTYReward,
+}: LiquityStoreState) => ({
+  liquidityMiningStake,
+  liquidityMiningLQTYReward,
 });
 
 export const Disabled: React.FC = () => {
-  const { liquidityMiningStake, liquidityMiningLQTYReward } = useLiquitySelector(selector);
+  const {
+    liquidityMiningStake,
+    liquidityMiningLQTYReward,
+  } = useLiquitySelector(selector);
   const hasStake = !liquidityMiningStake.isZero;
 
   return (
@@ -36,14 +42,14 @@ export const Disabled: React.FC = () => {
                 label="Stake"
                 inputId="farm-deposit"
                 amount={liquidityMiningStake.prettify(4)}
-                unit={LP}
+                unit={Units.LP}
               />
               <StaticRow
                 label="Reward"
                 inputId="farm-reward"
                 amount={liquidityMiningLQTYReward.prettify(4)}
                 color={liquidityMiningLQTYReward.nonZero && "success"}
-                unit={GT}
+                unit={Units.GT}
               />
             </Box>
             <UnstakeAndClaim />

@@ -4,21 +4,27 @@ import { Text, Flex, Box, Heading } from "theme-ui";
 import { LiquityStoreState } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
-import { COIN, GT } from "../strings";
+import { Units } from "../strings";
 import { useLiquity } from "../hooks/LiquityContext";
 import { shortenAddress } from "../utils/shortenAddress";
 
 import { Icon } from "./Icon";
 
-const select = ({ accountBalance, lusdBalance, lqtyBalance }: LiquityStoreState) => ({
+const select = ({
   accountBalance,
   lusdBalance,
-  lqtyBalance
+  lqtyBalance,
+}: LiquityStoreState) => ({
+  accountBalance,
+  lusdBalance,
+  lqtyBalance,
 });
 
 export const UserAccount: React.FC = () => {
   const { account } = useLiquity();
-  const { accountBalance, lusdBalance, lqtyBalance } = useLiquitySelector(select);
+  const { accountBalance, lusdBalance, lqtyBalance } = useLiquitySelector(
+    select
+  );
 
   return (
     <Box sx={{ display: ["none", "flex"] }}>
@@ -36,9 +42,9 @@ export const UserAccount: React.FC = () => {
         <Icon name="wallet" size="lg" />
 
         {([
-          ["ETH", accountBalance],
-          [COIN, lusdBalance],
-          [GT, lqtyBalance]
+          [Units.ETH, accountBalance],
+          [Units.COIN, lusdBalance],
+          [Units.GT, lqtyBalance],
         ] as const).map(([currency, balance], i) => (
           <Flex key={i} sx={{ ml: 3, flexDirection: "column" }}>
             <Heading sx={{ fontSize: 1 }}>{currency}</Heading>

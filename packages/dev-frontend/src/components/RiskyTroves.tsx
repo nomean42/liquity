@@ -7,14 +7,14 @@ import {
   MINIMUM_COLLATERAL_RATIO,
   CRITICAL_COLLATERAL_RATIO,
   UserTrove,
-  Decimal
+  Decimal,
 } from "@liquity/lib-base";
 import { BlockPolledLiquityStoreState } from "@liquity/lib-ethers";
 import { useLiquitySelector } from "@liquity/lib-react";
 
 import { shortenAddress } from "../utils/shortenAddress";
 import { useLiquity } from "../hooks/LiquityContext";
-import { COIN } from "../strings";
+import { Units } from "../strings";
 
 import { Icon } from "./Icon";
 import { LoadingOverlay } from "./LoadingOverlay";
@@ -25,7 +25,10 @@ import { Abbreviation } from "./Abbreviation";
 const rowHeight = "40px";
 
 const liquidatableInNormalMode = (trove: UserTrove, price: Decimal) =>
-  [trove.collateralRatioIsBelowMinimum(price), "Collateral ratio not low enough"] as const;
+  [
+    trove.collateralRatioIsBelowMinimum(price),
+    "Collateral ratio not low enough",
+  ] as const;
 
 const liquidatableInRecoveryMode = (
   trove: UserTrove,
@@ -35,10 +38,13 @@ const liquidatableInRecoveryMode = (
 ) => {
   const collateralRatio = trove.collateralRatio(price);
 
-  if (collateralRatio.gte(MINIMUM_COLLATERAL_RATIO) && collateralRatio.lt(totalCollateralRatio)) {
+  if (
+    collateralRatio.gte(MINIMUM_COLLATERAL_RATIO) &&
+    collateralRatio.lt(totalCollateralRatio)
+  ) {
     return [
       trove.debt.lte(lusdInStabilityPool),
-      "There's not enough LUSD in the Stability pool to cover the debt"
+      "There's not enough LUSD in the Stability pool to cover the debt",
     ] as const;
   } else {
     return liquidatableInNormalMode(trove, price);
@@ -54,14 +60,14 @@ const select = ({
   price,
   total,
   lusdInStabilityPool,
-  blockTag
+  blockTag,
 }: BlockPolledLiquityStoreState) => ({
   numberOfTroves,
   price,
   recoveryMode: total.collateralRatioIsBelowCritical(price),
   totalCollateralRatio: total.collateralRatio(price),
   lusdInStabilityPool,
-  blockTag
+  blockTag,
 });
 
 export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
@@ -71,7 +77,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
     recoveryMode,
     totalCollateralRatio,
     lusdInStabilityPool,
-    price
+    price,
   } = useLiquitySelector(select);
   const { liquity } = useLiquity();
 
@@ -113,11 +119,11 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
         {
           first: pageSize,
           sortedBy: "ascendingCollateralRatio",
-          startingAt: clampedPage * pageSize
+          startingAt: clampedPage * pageSize,
         },
         { blockTag }
       )
-      .then(troves => {
+      .then((troves) => {
         if (mounted) {
           setTroves(troves);
           setLoading(false);
@@ -163,13 +169,23 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
             <>
               <Abbreviation
                 short={`page ${clampedPage + 1} / ${numberOfPages}`}
-                sx={{ mr: [0, 3], fontWeight: "body", fontSize: [1, 2], letterSpacing: [-1, 0] }}
+                sx={{
+                  mr: [0, 3],
+                  fontWeight: "body",
+                  fontSize: [1, 2],
+                  letterSpacing: [-1, 0],
+                }}
               >
-                {clampedPage * pageSize + 1}-{Math.min((clampedPage + 1) * pageSize, numberOfTroves)}{" "}
-                of {numberOfTroves}
+                {clampedPage * pageSize + 1}-
+                {Math.min((clampedPage + 1) * pageSize, numberOfTroves)} of{" "}
+                {numberOfTroves}
               </Abbreviation>
 
-              <Button variant="titleIcon" onClick={previousPage} disabled={clampedPage <= 0}>
+              <Button
+                variant="titleIcon"
+                onClick={previousPage}
+                disabled={clampedPage <= 0}
+              >
                 <Icon name="chevron-left" size="lg" />
               </Button>
 
@@ -209,7 +225,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
               width: "100%",
 
               textAlign: "center",
-              lineHeight: 1.15
+              lineHeight: 1.15,
             }}
           >
             <colgroup>
@@ -225,11 +241,19 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
                 <th>Owner</th>
                 <th>
                   <Abbreviation short="Coll.">Collateral</Abbreviation>
-                  <Box sx={{ fontSize: [0, 1], fontWeight: "body", opacity: 0.5 }}>ETH</Box>
+                  <Box
+                    sx={{ fontSize: [0, 1], fontWeight: "body", opacity: 0.5 }}
+                  >
+                    {Units.ETH}
+                  </Box>
                 </th>
                 <th>
                   Debt
-                  <Box sx={{ fontSize: [0, 1], fontWeight: "body", opacity: 0.5 }}>{COIN}</Box>
+                  <Box
+                    sx={{ fontSize: [0, 1], fontWeight: "body", opacity: 0.5 }}
+                  >
+                    {Units.COIN}
+                  </Box>
                 </th>
                 <th>
                   Coll.
@@ -242,7 +266,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
 
             <tbody>
               {troves.map(
-                trove =>
+                (trove) =>
                   !trove.isEmpty && ( // making sure the Trove hasn't been liquidated
                     // (TODO: remove check after we can fetch multiple Troves in one call)
                     <tr key={trove.ownerAddress}>
@@ -250,7 +274,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          height: rowHeight
+                          height: rowHeight,
                         }}
                       >
                         <Tooltip message={trove.ownerAddress} placement="top">
@@ -259,7 +283,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
                             sx={{
                               width: ["73px", "unset"],
                               overflow: "hidden",
-                              position: "relative"
+                              position: "relative",
                             }}
                           >
                             {shortenAddress(trove.ownerAddress)}
@@ -272,7 +296,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
                                 width: "50px",
                                 height: "100%",
                                 background:
-                                  "linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%)"
+                                  "linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%)",
                               }}
                             />
                           </Text>
@@ -282,9 +306,16 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
                           text={trove.ownerAddress}
                           onCopy={() => setCopied(trove.ownerAddress)}
                         >
-                          <Button variant="icon" sx={{ width: "24px", height: "24px" }}>
+                          <Button
+                            variant="icon"
+                            sx={{ width: "24px", height: "24px" }}
+                          >
                             <Icon
-                              name={copied === trove.ownerAddress ? "clipboard-check" : "clipboard"}
+                              name={
+                                copied === trove.ownerAddress
+                                  ? "clipboard-check"
+                                  : "clipboard"
+                              }
                               size="sm"
                             />
                           </Button>
@@ -301,7 +332,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
                         </Abbreviation>
                       </td>
                       <td>
-                        {(collateralRatio => (
+                        {((collateralRatio) => (
                           <Text
                             color={
                               collateralRatio.gt(CRITICAL_COLLATERAL_RATIO)
@@ -327,9 +358,12 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
                                   totalCollateralRatio,
                                   lusdInStabilityPool
                                 )
-                              : liquidatableInNormalMode(trove, price)
+                              : liquidatableInNormalMode(trove, price),
                           ]}
-                          send={liquity.send.liquidate.bind(liquity.send, trove.ownerAddress)}
+                          send={liquity.send.liquidate.bind(
+                            liquity.send,
+                            trove.ownerAddress
+                          )}
                         >
                           <Button variant="dangerIcon">
                             <Icon name="trash" />

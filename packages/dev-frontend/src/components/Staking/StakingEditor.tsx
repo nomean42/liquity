@@ -11,7 +11,7 @@ import {
 import { Decimal, LiquityStoreState, LQTYStake } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
-import { GT } from "../../strings";
+import { Units } from "../../strings";
 
 import { Icon } from "../Icon";
 import { Row, StaticAmounts } from "../Trove/Editor";
@@ -24,7 +24,6 @@ const select = ({ lqtyBalance }: LiquityStoreState) => ({
 });
 
 type StakingEditorProps = {
-  title: string;
   originalStake: LQTYStake;
   editedLQTY: Decimal;
   dispatch: (
@@ -33,7 +32,7 @@ type StakingEditorProps = {
 };
 
 const inputId = "stake-lqty";
-const unit = GT;
+const unit = Units.GT;
 const editableStyle: ThemeUICSSProperties = {
   flexGrow: 1,
 
@@ -52,7 +51,6 @@ const editableStyle: ThemeUICSSProperties = {
 
 export const StakingEditor: React.FC<StakingEditorProps> = ({
   children,
-  title,
   originalStake,
   editedLQTY,
   dispatch,
@@ -86,7 +84,7 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
     ({ target: { value } }) => {
       const newValue = parseFloat(value);
       const isInvalid = Number.isNaN(newValue) || newValue <= 0;
-      debugger;
+
       setInvalid(isInvalid || maxedOut);
       if (!isInvalid) {
         setInputAmount(Decimal.from(newValue));
@@ -125,7 +123,7 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
   return (
     <Card>
       <Heading>
-        {title}
+        Staking
         {!changePending && (
           <Button
             variant="titleIcon"
@@ -144,7 +142,6 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
               bg: "background",
             }}
             labelledBy={`${inputId}-label`}
-            // amount={ -> }
             amount={
               <>
                 {`${originalStake.stakedLQTY.prettify()} `}

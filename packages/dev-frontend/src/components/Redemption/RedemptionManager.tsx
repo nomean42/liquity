@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Button, Box, Flex, Card, Heading } from "theme-ui";
 
-import { Decimal, Percent, LiquityStoreState, MINIMUM_COLLATERAL_RATIO } from "@liquity/lib-base";
+import {
+  Decimal,
+  Percent,
+  LiquityStoreState,
+  MINIMUM_COLLATERAL_RATIO,
+} from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
-import { COIN } from "../../strings";
+import { Units } from "../../strings";
 
 import { Icon } from "../Icon";
 import { LoadingOverlay } from "../LoadingOverlay";
@@ -21,7 +26,7 @@ const select = ({ price, fees, total, lusdBalance }: LiquityStoreState) => ({
   price,
   fees,
   total,
-  lusdBalance
+  lusdBalance,
 });
 
 const transactionId = "redemption";
@@ -47,7 +52,10 @@ export const RedemptionManager: React.FC = () => {
       myTransactionState.type === "waitingForConfirmation"
     ) {
       setChangePending(true);
-    } else if (myTransactionState.type === "failed" || myTransactionState.type === "cancelled") {
+    } else if (
+      myTransactionState.type === "failed" ||
+      myTransactionState.type === "cancelled"
+    ) {
       setChangePending(false);
     } else if (myTransactionState.type === "confirmed") {
       setLUSDAmount(Decimal.ZERO);
@@ -61,7 +69,7 @@ export const RedemptionManager: React.FC = () => {
         <ErrorDescription>
           You can't redeem LUSD when the total collateral ratio is less than{" "}
           <Amount>{mcrPercent}</Amount>. Please try again later.
-        </ErrorDescription>
+        </ErrorDescription>,
       ]
     : lusdAmount.gt(lusdBalance)
     ? [
@@ -69,20 +77,22 @@ export const RedemptionManager: React.FC = () => {
         <ErrorDescription>
           The amount you're trying to redeem exceeds your balance by{" "}
           <Amount>
-            {lusdAmount.sub(lusdBalance).prettify()} {COIN}
+            {lusdAmount.sub(lusdBalance).prettify()} {Units.COIN}
           </Amount>
           .
-        </ErrorDescription>
+        </ErrorDescription>,
       ]
     : [
         true,
         <ActionDescription>
-          You will receive <Amount>{ethAmount.sub(ethFee).prettify(4)} ETH</Amount> in exchange for{" "}
+          You will receive{" "}
+          <Amount>{ethAmount.sub(ethFee).prettify(4)} ETH</Amount> in exchange
+          for{" "}
           <Amount>
-            {lusdAmount.prettify()} {COIN}
+            {lusdAmount.prettify()} {Units.COIN}
           </Amount>
           .
-        </ActionDescription>
+        </ActionDescription>,
       ];
 
   return (
@@ -107,10 +117,10 @@ export const RedemptionManager: React.FC = () => {
           amount={lusdAmount.prettify()}
           maxAmount={lusdBalance.toString()}
           maxedOut={lusdAmount.eq(lusdBalance)}
-          unit={COIN}
+          unit={Units.COIN}
           {...{ editingState }}
           editedAmount={lusdAmount.toString(2)}
-          setEditedAmount={amount => setLUSDAmount(Decimal.from(amount))}
+          setEditedAmount={(amount) => setLUSDAmount(Decimal.from(amount))}
         />
 
         {dirty && (
@@ -119,12 +129,14 @@ export const RedemptionManager: React.FC = () => {
             inputId="redeem-fee"
             amount={ethFee.toString(4)}
             pendingAmount={feePct.toString(2)}
-            unit="ETH"
+            unit={Units.ETH}
           />
         )}
 
         {((dirty || !canRedeem) && description) || (
-          <ActionDescription>Enter the amount of {COIN} you'd like to redeem.</ActionDescription>
+          <ActionDescription>
+            Enter the amount of {Units.COIN} you'd like to redeem.
+          </ActionDescription>
         )}
 
         <Flex variant="layout.actions">
