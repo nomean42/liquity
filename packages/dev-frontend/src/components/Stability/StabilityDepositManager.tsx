@@ -44,9 +44,6 @@ const reduce = (
   state: StabilityDepositManagerState,
   action: StabilityDepositManagerAction
 ): StabilityDepositManagerState => {
-  // console.log(state);
-  // console.log(action);
-
   const { originalDeposit, editedLUSD, changePending } = state;
 
   switch (action.type) {

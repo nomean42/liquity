@@ -21,5 +21,18 @@ export const prettifyNumber = (num: number): string => {
 
   return mantissa !== undefined
     ? prettyCharacteristic + "." + mantissa + (mantissa.length === 1 ? "0" : "")
-    : prettyCharacteristic;
+    : prettyCharacteristic + ".00";
+};
+
+export const prettifyDecimalDiff = (
+  original: Decimal,
+  edited: Decimal,
+  isAddPositive: boolean
+): string => {
+  const editedNumber = parseDecimalishToNumber(edited);
+
+  return prettifyNumber(
+    parseDecimalishToNumber(original) +
+      (isAddPositive ? +editedNumber : -editedNumber)
+  );
 };

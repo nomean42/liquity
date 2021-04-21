@@ -3,6 +3,7 @@ import { Button, Flex } from "theme-ui";
 
 import {
   Decimal,
+  Difference,
   LiquityStoreState,
   LQTYStake,
   LQTYStakeChange,
@@ -24,7 +25,7 @@ import { ErrorDescription } from "../ErrorDescription";
 
 const init = ({ lqtyStake }: LiquityStoreState) => ({
   originalStake: lqtyStake,
-  editedLQTY: lqtyStake.stakedLQTY,
+  editedLQTY: Decimal.ZERO,
 });
 
 type StakeManagerState = ReturnType<typeof init>;
@@ -125,33 +126,24 @@ const StakingManagerActionDescription: React.FC<StakingManagerActionDescriptionP
 
 export const StakingManager: React.FC = () => {
   const { dispatch: dispatchStakingViewAction, kind } = useStakingView();
-  const [
-    { originalStake, editedLQTY: editedLQTYOriginal },
-    dispatch,
-  ] = useLiquityReducer(reduce, init);
-  const editedLQTY = Decimal.from(editedLQTYOriginal);
-  const stakedLQTY = originalStake.stakedLQTY;
+  const [{ originalStake, editedLQTY }, dispatch] = useLiquityReducer(
+    reduce,
+    init
+  );
   const lqtyBalance = useLiquitySelector(selectLQTYBalance);
   const isStakeKind = kind === "STAKE";
-
-  const editedDiffLQTY = isStakeKind
-    ? editedLQTY.sub(stakedLQTY)
-    : stakedLQTY.sub(editedLQTY);
+  const { stakedLQTY } = originalStake;
 
   const getValidChange = (): [
     LQTYStakeChange<Decimal> | undefined,
     React.ReactNode
   ] => {
-    const change = isStakeKind
-      ? originalStake.getStakeChange(editedDiffLQTY)
-      : originalStake.getWithdrawChange(editedDiffLQTY);
-
-    if (!change) {
+    if (editedLQTY.isZero) {
       return [undefined, undefined];
     }
 
-    const isStakeTooMuch = isStakeKind && editedDiffLQTY.gt(lqtyBalance);
-    const isWithdrawTooMuch = !isStakeKind && editedDiffLQTY.gt(stakedLQTY);
+    const isStakeTooMuch = isStakeKind && editedLQTY.gt(lqtyBalance);
+    const isWithdrawTooMuch = !isStakeKind && editedLQTY.gt(stakedLQTY);
 
     if (isStakeTooMuch || isWithdrawTooMuch) {
       return [
@@ -161,27 +153,37 @@ export const StakingManager: React.FC = () => {
             isStakeKind ? "stake" : "withdraw"
           } exceeds your ${isStakeKind ? "balance" : "stake"} by `}
           <Amount>
-            {editedDiffLQTY.prettify()} {Units.GT}
+            {`${Difference.between(
+              stakedLQTY,
+              editedLQTY
+            )?.absoluteValue?.prettify()} 
+            ${Units.GT}`}
           </Amount>
           .
         </ErrorDescription>,
       ];
     }
 
-    return [
-      change,
-      <StakingManagerActionDescription
-        originalStake={originalStake}
-        change={change}
-      />,
-    ];
+    const change = isStakeKind
+      ? originalStake.getStakeChange(editedLQTY)
+      : originalStake.getWithdrawChange(editedLQTY);
+
+    return change
+      ? [
+          change,
+          <StakingManagerActionDescription
+            originalStake={originalStake}
+            change={change}
+          />,
+        ]
+      : [undefined, undefined];
   };
   const [validChange, description] = getValidChange();
 
   const actionTitle = isStakeKind ? "Stake" : "Withdraw";
 
   return (
-    <StakingEditor {...{ originalStake, editedLQTY, dispatch }}>
+    <StakingEditor {...{ stakedLQTY, editedLQTY, dispatch }}>
       {description}
       <Flex variant="layout.actions">
         <Button
@@ -193,7 +195,7 @@ export const StakingManager: React.FC = () => {
           Cancel
         </Button>
 
-        {validChange && !editedDiffLQTY.isZero ? (
+        {validChange ? (
           <StakingManagerAction change={validChange}>
             {actionTitle}
           </StakingManagerAction>

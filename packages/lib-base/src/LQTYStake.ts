@@ -28,14 +28,22 @@ export class LQTYStake {
   readonly lusdGain: Decimal;
 
   /** @internal */
-  constructor(stakedLQTY = Decimal.ZERO, collateralGain = Decimal.ZERO, lusdGain = Decimal.ZERO) {
+  constructor(
+    stakedLQTY = Decimal.ZERO,
+    collateralGain = Decimal.ZERO,
+    lusdGain = Decimal.ZERO
+  ) {
     this.stakedLQTY = stakedLQTY;
     this.collateralGain = collateralGain;
     this.lusdGain = lusdGain;
   }
 
   get isEmpty(): boolean {
-    return this.stakedLQTY.isZero && this.collateralGain.isZero && this.lusdGain.isZero;
+    return (
+      this.stakedLQTY.isZero &&
+      this.collateralGain.isZero &&
+      this.lusdGain.isZero
+    );
   }
 
   /** @internal */
@@ -63,13 +71,15 @@ export class LQTYStake {
    *
    * @returns An object representing the change, or `undefined` if the staked amounts are equal.
    */
-  whatChanged(thatStakedLQTY: Decimalish): LQTYStakeChange<Decimal> | undefined {
+  whatChanged(
+    thatStakedLQTY: Decimalish
+  ): LQTYStakeChange<Decimal> | undefined {
     thatStakedLQTY = Decimal.from(thatStakedLQTY);
 
     if (thatStakedLQTY.lt(this.stakedLQTY)) {
       return {
         unstakeLQTY: this.stakedLQTY.sub(thatStakedLQTY),
-        unstakeAllLQTY: thatStakedLQTY.isZero
+        unstakeAllLQTY: thatStakedLQTY.isZero,
       };
     }
 
@@ -78,18 +88,14 @@ export class LQTYStake {
     }
   }
 
-  getStakeChange(diffStakedLQTY: Decimalish): LQTYStakeChange<Decimal> | undefined {
-    const decimalDiff = Decimal.from(diffStakedLQTY);
-
-    return { stakeLQTY: this.stakedLQTY.add(decimalDiff) };
+  getStakeChange(diffStakedLQTY: Decimal): LQTYStakeChange<Decimal> {
+    return { stakeLQTY: this.stakedLQTY.add(diffStakedLQTY) };
   }
 
-  getWithdrawChange(diffStakedLQTY: Decimalish): LQTYStakeChange<Decimal> | undefined {
-    const decimalDiff = Decimal.from(diffStakedLQTY);
-
+  getWithdrawChange(diffStakedLQTY: Decimalish): LQTYStakeChange<Decimal> {
     return {
-      unstakeLQTY: this.stakedLQTY.sub(decimalDiff),
-      unstakeAllLQTY: this.stakedLQTY.eq(decimalDiff),
+      unstakeLQTY: this.stakedLQTY.sub(diffStakedLQTY),
+      unstakeAllLQTY: this.stakedLQTY.eq(diffStakedLQTY),
     };
   }
 
