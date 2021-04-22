@@ -153,11 +153,11 @@ export const StakingManager: React.FC = () => {
             isStakeKind ? "stake" : "withdraw"
           } exceeds your ${isStakeKind ? "balance" : "stake"} by `}
           <Amount>
-            {`${Difference.between(
+            {Difference.between(
               stakedLQTY,
               editedLQTY
-            )?.absoluteValue?.prettify()} 
-            ${Units.GT}`}
+            )?.absoluteValue?.prettify()}{" "}
+            {Units.GT}
           </Amount>
           .
         </ErrorDescription>,
@@ -183,7 +183,17 @@ export const StakingManager: React.FC = () => {
   const actionTitle = isStakeKind ? "Stake" : "Withdraw";
 
   return (
-    <StakingEditor {...{ stakedLQTY, editedLQTY, dispatch }}>
+    <StakingEditor
+      {...{
+        stakedLQTY,
+        editedLQTY: isStakeKind
+          ? stakedLQTY.add(editedLQTY)
+          : editedLQTY.gt(stakedLQTY)
+          ? Decimal.ZERO
+          : stakedLQTY.sub(editedLQTY),
+        dispatch,
+      }}
+    >
       {description}
       <Flex variant="layout.actions">
         <Button

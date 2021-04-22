@@ -1,12 +1,12 @@
 import { useMemo } from "react";
-import { Decimal, Decimalish } from "@liquity/lib-base";
+import { Decimal } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 import { ILiquitySelector } from "@liquity/lib-react/src/hooks/useLiquitySelector";
 import { parseDecimalishToNumber } from "../utils/number";
 
 type IPoolShareSelector = ILiquitySelector<{
   currentAmount: Decimal;
-  totalAmount: Decimalish;
+  totalAmount: Decimal;
 }>;
 
 interface IPoolShareStatus {

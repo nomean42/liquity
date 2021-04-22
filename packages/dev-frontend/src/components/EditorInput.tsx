@@ -19,7 +19,6 @@ import { Row, StaticAmounts } from "./Trove/Editor";
 import { LoadingOverlay } from "./LoadingOverlay";
 import { Decimal } from "@liquity/lib-base";
 import { Units } from "../strings";
-import { prettifyDecimalDiff } from "../utils/number";
 
 interface EditorInputProps {
   originalStake: Decimal;
@@ -64,27 +63,26 @@ export const EditorInput: React.FC<EditorInputProps> = ({
   const [invalid, setInvalid] = useState(false);
 
   const [maxAmount, maxedOut] = useMemo((): [Decimal, boolean] => {
-    const targetBalance = isKindStake ? walletBalance : originalStake;
-    return [targetBalance, editedStake.gt(targetBalance)];
+    if (isKindStake) {
+      return [walletBalance, editedStake.sub(originalStake).gt(walletBalance)];
+    }
+
+    return [originalStake, editedStake.isZero];
   }, [isKindStake, walletBalance, originalStake, editedStake]);
 
   useEffect(() => {
-    setInvalid(
-      maxedOut
-    );
+    setInvalid(maxedOut);
   }, [editedStake, originalStake, maxedOut]);
 
   const setInputChange = useCallback(
     (value: string) => {
       const newValue = parseFloat(value === "" ? "0" : value);
 
-      if (newValue >= 0) {
+      if (newValue > 0) {
         setEditedStake(Decimal.from(newValue));
-      } else {
-        setInvalid(true);
       }
     },
-    [setEditedStake, setInvalid]
+    [setEditedStake]
   );
 
   const onMaxClick = useCallback(
@@ -113,11 +111,6 @@ export const EditorInput: React.FC<EditorInputProps> = ({
     }
   }, [inputComponent]);
 
-  const newStakePretty = useMemo(
-    () => prettifyDecimalDiff(originalStake, editedStake, isKindStake),
-    [isKindStake, originalStake, editedStake]
-  );
-
   return (
     <Card>
       <Heading>
@@ -126,7 +119,12 @@ export const EditorInput: React.FC<EditorInputProps> = ({
           <Button
             variant="titleIcon"
             sx={{ ":enabled:hover": { color: "danger" } }}
-            onClick={revert}
+            onClick={() => {
+              ((inputComponent.current as unknown) as HTMLInputElement).value =
+                "";
+              setEditedStake(Decimal.ZERO);
+              revert();
+            }}
           >
             <Icon name="history" size="lg" />
           </Button>
@@ -144,7 +142,7 @@ export const EditorInput: React.FC<EditorInputProps> = ({
               <>
                 {`${originalStake.prettify()} `}
                 <Icon name="long-arrow-alt-right" size="sm" />
-                {` ${newStakePretty}`}
+                {` ${editedStake.prettify()}`}
               </>
             }
             {...{ inputId, unit, invalid }}
