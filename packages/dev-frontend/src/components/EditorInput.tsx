@@ -21,6 +21,7 @@ import { Decimal } from "@liquity/lib-base";
 import { Units } from "../strings";
 
 interface EditorInputProps {
+  title: string;
   originalStake: Decimal;
   editedStake: Decimal;
   setEditedStake(value: Decimal): void;
@@ -47,7 +48,7 @@ const editableStyle: ThemeUICSSProperties = {
 };
 
 export const EditorInput: React.FC<EditorInputProps> = ({
-  children,
+  title,
   originalStake,
   editedStake,
   setEditedStake,
@@ -55,6 +56,7 @@ export const EditorInput: React.FC<EditorInputProps> = ({
   revert,
   inputId,
   unit,
+  children,
 }) => {
   const { changePending, kind } = useStakingView();
   const inputComponent = useRef<HTMLInputElement>(null);
@@ -123,8 +125,8 @@ export const EditorInput: React.FC<EditorInputProps> = ({
   return (
     <Card>
       <Heading>
-        Staking
-        {!changePending && (
+        {title}
+        {!editedStake.eq(originalStake) && !changePending && (
           <Button
             variant="titleIcon"
             sx={{ ":enabled:hover": { color: "danger" } }}
@@ -187,7 +189,6 @@ export const EditorInput: React.FC<EditorInputProps> = ({
         </Row>
         {children}
       </Box>
-
       {changePending && <LoadingOverlay />}
     </Card>
   );

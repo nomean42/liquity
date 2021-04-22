@@ -37,6 +37,7 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
 
   return (
     <EditorInput
+      title="Staking"
       originalStake={stakedLQTY}
       editedStake={editedLQTY}
       setEditedStake={setEditedStake}
