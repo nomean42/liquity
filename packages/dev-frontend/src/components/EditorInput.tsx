@@ -76,24 +76,33 @@ export const EditorInput: React.FC<EditorInputProps> = ({
 
   const setInputChange = useCallback(
     (value: string) => {
+      const component = (inputComponent.current as unknown) as HTMLInputElement;
+
+      if (component.value !== value) {
+        component.value = value;
+      }
+
       const newValue = parseFloat(value === "" ? "0" : value);
 
-      if (newValue > 0) {
+      if (newValue >= 0) {
         setEditedStake(Decimal.from(newValue));
       }
     },
-    [setEditedStake]
+    [setEditedStake, inputComponent]
   );
 
   const onMaxClick = useCallback(
     (event) => {
-      const maxAmountString = maxAmount.toString();
-      ((inputComponent.current as unknown) as HTMLInputElement).value = maxAmountString;
-      setInputChange(maxAmountString);
+      setInputChange(maxAmount.toString());
       event.stopPropagation();
     },
     [maxAmount, setInputChange]
   );
+
+  const onRevertClick = useCallback(() => {
+    setInputChange("");
+    revert();
+  }, [setInputChange, revert]);
 
   const onInputChange = useCallback(
     ({ target: { value } }) => {
@@ -119,12 +128,7 @@ export const EditorInput: React.FC<EditorInputProps> = ({
           <Button
             variant="titleIcon"
             sx={{ ":enabled:hover": { color: "danger" } }}
-            onClick={() => {
-              ((inputComponent.current as unknown) as HTMLInputElement).value =
-                "";
-              setEditedStake(Decimal.ZERO);
-              revert();
-            }}
+            onClick={onRevertClick}
           >
             <Icon name="history" size="lg" />
           </Button>
