@@ -137,7 +137,6 @@ export const StabilityDepositManager: React.FC = () => {
   const myTransactionState = useMyTransactionState(transactionId);
 
   useEffect(() => {
-    console.log(myTransactionState.type);
     if (
       myTransactionState.type === "waitingForApproval" ||
       myTransactionState.type === "waitingForConfirmation"
