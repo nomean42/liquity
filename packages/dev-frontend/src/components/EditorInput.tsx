@@ -70,10 +70,10 @@ export const EditorInput: React.FC<EditorInputProps> = ({
 
   const [maxAmount, maxedOut] = useMemo((): [Decimal, boolean] => {
     if (isKindStake) {
-      return [walletBalance, editedStake.sub(originalStake).gt(walletBalance)];
+      return [walletBalance, editedStake.sub(originalStake).gte(walletBalance)];
     }
-
-    return [originalStake, editedStake.isZero];
+    // TODO wtf 0.000000000000220000?
+    return [originalStake, editedStake.lt(Decimal.from('0.00001'))];
   }, [isKindStake, walletBalance, originalStake, editedStake]);
 
   useEffect(() => {
@@ -161,7 +161,7 @@ export const EditorInput: React.FC<EditorInputProps> = ({
               <Button
                 sx={{ fontSize: 1, p: 1, px: 3 }}
                 onClick={onMaxClick}
-                disabled={maxAmount.eq(editedStake)}
+                disabled={maxedOut}
               >
                 max
               </Button>
