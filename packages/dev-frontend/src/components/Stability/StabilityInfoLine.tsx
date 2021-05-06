@@ -20,10 +20,10 @@ const selectLUSDBalance = ({
 });
 
 const poolShareSelector = ({
-  lusdBalance,
+  stabilityDeposit,
   lusdInStabilityPool,
 }: LiquityStoreState) => ({
-  currentAmount: lusdBalance,
+  currentAmount: stabilityDeposit.currentLUSD,
   totalAmount: lusdInStabilityPool,
 });
 
@@ -31,6 +31,7 @@ export const StabilityInfoLine: React.FC<IProps> = ({ editedLUSD }) => {
   const { lusdBalance, stabilityDeposit } = useLiquitySelector(
     selectLUSDBalance
   );
+
   const poolShareInfo = usePoolShareInfo(
     poolShareSelector,
     editedLUSD,
