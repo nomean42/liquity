@@ -5,16 +5,16 @@ import { LiquityStoreState } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
 import { Units } from "../../strings";
-import { Icon } from "../Icon";
 import { LoadingOverlay } from "../LoadingOverlay";
 import { useMyTransactionState } from "../Transaction";
-import { DisabledEditableRow, StaticRow } from "../Trove/Editor";
+import { DisabledEditableRow } from "../Trove/Editor";
 import { ClaimAndMove } from "./actions/ClaimAndMove";
 import { ClaimRewards } from "./actions/ClaimRewards";
 import { useStabilityView } from "./context/StabilityViewContext";
 import { RemainingLQTY } from "./RemainingLQTY";
 import { Yield } from "./Yield";
-import { InfoIcon } from "../InfoIcon";
+import { StabilityInfoLine } from "./StabilityInfoLine";
+import { StabilityDepositKind } from "./StabilityDepositManager";
 
 const selector = ({ stabilityDeposit, trove }: LiquityStoreState) => ({
   stabilityDeposit,
@@ -25,9 +25,12 @@ export const ActiveDeposit: React.FC = () => {
   const { dispatchEvent } = useStabilityView();
   const { stabilityDeposit, trove } = useLiquitySelector(selector);
 
-  const handleAdjustDeposit = useCallback(() => {
-    dispatchEvent("ADJUST_DEPOSIT_PRESSED");
-  }, [dispatchEvent]);
+  const handleAdjustDeposit = useCallback(
+    (kind: StabilityDepositKind) => {
+      dispatchEvent("ADJUST_DEPOSIT_PRESSED", kind);
+    },
+    [dispatchEvent]
+  );
 
   const hasReward = !stabilityDeposit.lqtyReward.isZero;
   const hasGain = !stabilityDeposit.collateralGain.isZero;
@@ -63,50 +66,27 @@ export const ActiveDeposit: React.FC = () => {
             amount={stabilityDeposit.currentLUSD.prettify()}
             unit={Units.COIN}
           />
-
-          <StaticRow
-            label="Liquidation gain"
-            inputId="deposit-gain"
-            amount={stabilityDeposit.collateralGain.prettify(4)}
-            color={stabilityDeposit.collateralGain.nonZero && "success"}
-            unit={Units.ETH}
-          />
-
-          <Flex sx={{ alignItems: "center" }}>
-            <StaticRow
-              label="Reward"
-              inputId="deposit-reward"
-              amount={stabilityDeposit.lqtyReward.prettify()}
-              color={stabilityDeposit.lqtyReward.nonZero && "success"}
-              unit={Units.GT}
-              infoIcon={
-                <InfoIcon
-                  tooltip={
-                    <Card variant="tooltip" sx={{ width: "240px" }}>
-                      Although the LQTY rewards accrue every minute, the value
-                      on the UI only updates when a user transacts with the
-                      Stability Pool. Therefore you may receive more rewards
-                      than is displayed when you claim or adjust your deposit.
-                    </Card>
-                  }
-                />
-              }
-            />
-            <Flex sx={{ justifyContent: "flex-end", flex: 1 }}>
-              <Yield />
-            </Flex>
+          <StabilityInfoLine />
+          <Flex sx={{ justifyContent: "flex-end", flex: 1 }}>
+            <Yield />
           </Flex>
         </Box>
 
-        <Flex variant="layout.actions">
-          <Button variant="outline" onClick={handleAdjustDeposit}>
-            <Icon name="pen" size="sm" />
-            &nbsp;Adjust
+        <Flex sx={{ mt: 2, justifyContent: "space-between" }}>
+          <Button
+            variant="outline"
+            onClick={() => handleAdjustDeposit("DEPOSIT")}
+          >
+            Deposit
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => handleAdjustDeposit("WITHDRAW")}
+          >
+            Withdraw
           </Button>
 
-          <ClaimRewards disabled={!hasGain && !hasReward}>
-            Claim ETH and LQTY
-          </ClaimRewards>
+          <ClaimRewards disabled={!hasGain && !hasReward}>Claim</ClaimRewards>
         </Flex>
 
         {hasTrove && (

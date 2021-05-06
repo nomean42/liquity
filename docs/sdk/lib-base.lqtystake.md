@@ -9,7 +9,7 @@ Represents a user's LQTY stake and accrued gains.
 <b>Signature:</b>
 
 ```typescript
-export declare class LQTYStake
+export declare class LQTYStake 
 ```
 
 ## Remarks
@@ -33,5 +33,7 @@ The constructor for this class is marked as internal. Third-party code should no
 |  --- | --- | --- |
 |  [apply(change)](./lib-base.lqtystake.apply.md) |  | Apply a [LQTYStakeChange](./lib-base.lqtystakechange.md) to this <code>LQTYStake</code>. |
 |  [equals(that)](./lib-base.lqtystake.equals.md) |  | Compare to another instance of <code>LQTYStake</code>. |
+|  [getStakeChange(diffStakedLQTY)](./lib-base.lqtystake.getstakechange.md) |  |  |
+|  [getWithdrawChange(diffStakedLQTY)](./lib-base.lqtystake.getwithdrawchange.md) |  |  |
 |  [whatChanged(thatStakedLQTY)](./lib-base.lqtystake.whatchanged.md) |  | Calculate the difference between this <code>LQTYStake</code> and <code>thatStakedLQTY</code>. |
 

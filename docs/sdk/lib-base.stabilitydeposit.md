@@ -33,5 +33,7 @@ The constructor for this class is marked as internal. Third-party code should no
 |  --- | --- | --- |
 |  [apply(change)](./lib-base.stabilitydeposit.apply.md) |  | Apply a [StabilityDepositChange](./lib-base.stabilitydepositchange.md) to this Stability Deposit. |
 |  [equals(that)](./lib-base.stabilitydeposit.equals.md) |  | Compare to another instance of <code>StabilityDeposit</code>. |
+|  [getDepositChange(thatLUSD)](./lib-base.stabilitydeposit.getdepositchange.md) |  |  |
+|  [getWithdrawChange(thatLUSD)](./lib-base.stabilitydeposit.getwithdrawchange.md) |  |  |
 |  [whatChanged(thatLUSD)](./lib-base.stabilitydeposit.whatchanged.md) |  | Calculate the difference between the <code>currentLUSD</code> in this Stability Deposit and <code>thatLUSD</code>. |
 

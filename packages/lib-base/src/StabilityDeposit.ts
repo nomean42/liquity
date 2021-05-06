@@ -93,16 +93,38 @@ export class StabilityDeposit {
    *
    * @returns An object representing the change, or `undefined` if the deposited amounts are equal.
    */
-  whatChanged(thatLUSD: Decimalish): StabilityDepositChange<Decimal> | undefined {
+  whatChanged(
+    thatLUSD: Decimalish
+  ): StabilityDepositChange<Decimal> | undefined {
     thatLUSD = Decimal.from(thatLUSD);
 
     if (thatLUSD.lt(this.currentLUSD)) {
-      return { withdrawLUSD: this.currentLUSD.sub(thatLUSD), withdrawAllLUSD: thatLUSD.isZero };
+      return {
+        withdrawLUSD: this.currentLUSD.sub(thatLUSD),
+        withdrawAllLUSD: thatLUSD.isZero,
+      };
     }
 
     if (thatLUSD.gt(this.currentLUSD)) {
       return { depositLUSD: thatLUSD.sub(this.currentLUSD) };
     }
+  }
+
+  getDepositChange(
+    thatLUSD: Decimalish
+  ): StabilityDepositChange<Decimal> | undefined {
+    thatLUSD = Decimal.from(thatLUSD);
+    return { depositLUSD: thatLUSD };
+  }
+
+  getWithdrawChange(
+    thatLUSD: Decimalish
+  ): StabilityDepositChange<Decimal> | undefined {
+    thatLUSD = Decimal.from(thatLUSD);
+    return {
+      withdrawLUSD: this.currentLUSD.sub(thatLUSD),
+      withdrawAllLUSD: thatLUSD.isZero,
+    };
   }
 
   /**

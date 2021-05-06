@@ -313,9 +313,9 @@ export class LQTYStake {
     readonly collateralGain: Decimal;
     equals(that: LQTYStake): boolean;
     // (undocumented)
-    getStakeChange(diffStakedLQTY: Decimalish): LQTYStakeChange<Decimal> | undefined;
+    getStakeChange(diffStakedLQTY: Decimal): LQTYStakeChange<Decimal>;
     // (undocumented)
-    getWithdrawChange(diffStakedLQTY: Decimalish): LQTYStakeChange<Decimal> | undefined;
+    getWithdrawChange(diffStakedLQTY: Decimalish): LQTYStakeChange<Decimal>;
     // (undocumented)
     get isEmpty(): boolean;
     readonly lusdGain: Decimal;
@@ -601,6 +601,10 @@ export class StabilityDeposit {
     readonly currentLUSD: Decimal;
     equals(that: StabilityDeposit): boolean;
     readonly frontendTag: string;
+    // (undocumented)
+    getDepositChange(thatLUSD: Decimalish): StabilityDepositChange<Decimal> | undefined;
+    // (undocumented)
+    getWithdrawChange(thatLUSD: Decimalish): StabilityDepositChange<Decimal> | undefined;
     readonly initialLUSD: Decimal;
     // (undocumented)
     get isEmpty(): boolean;

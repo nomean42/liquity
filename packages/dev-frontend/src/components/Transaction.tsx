@@ -1,10 +1,17 @@
 import React, { useState, useContext, useEffect, useCallback } from "react";
 import { Flex, Text, Box } from "theme-ui";
-import { Provider, TransactionResponse, TransactionReceipt } from "@ethersproject/abstract-provider";
+import {
+  Provider,
+  TransactionResponse,
+  TransactionReceipt,
+} from "@ethersproject/abstract-provider";
 import { hexDataSlice, hexDataLength } from "@ethersproject/bytes";
 import { defaultAbiCoder } from "@ethersproject/abi";
 
-import { buildStyles, CircularProgressbarWithChildren } from "react-circular-progressbar";
+import {
+  buildStyles,
+  CircularProgressbarWithChildren,
+} from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 
 import { EthersTransactionOverrides } from "@liquity/lib-ethers";
@@ -20,23 +27,23 @@ const strokeWidth = 10;
 const circularProgressbarStyle = {
   strokeLinecap: "butt",
   pathColor: "white",
-  trailColor: "rgba(255, 255, 255, 0.33)"
+  trailColor: "rgba(255, 255, 255, 0.33)",
 };
 
 const slowProgress = {
   strokeWidth,
   styles: buildStyles({
     ...circularProgressbarStyle,
-    pathTransitionDuration: 30
-  })
+    pathTransitionDuration: 30,
+  }),
 };
 
 const fastProgress = {
   strokeWidth,
   styles: buildStyles({
     ...circularProgressbarStyle,
-    pathTransitionDuration: 0.75
-  })
+    pathTransitionDuration: 0.75,
+  }),
 };
 
 type TransactionIdle = {
@@ -91,7 +98,9 @@ const TransactionContext = React.createContext<
 export const TransactionProvider: React.FC = ({ children }) => {
   const transactionState = useState<TransactionState>({ type: "idle" });
   return (
-    <TransactionContext.Provider value={transactionState}>{children}</TransactionContext.Provider>
+    <TransactionContext.Provider value={transactionState}>
+      {children}
+    </TransactionContext.Provider>
   );
 };
 
@@ -99,17 +108,23 @@ const useTransactionState = () => {
   const transactionState = useContext(TransactionContext);
 
   if (!transactionState) {
-    throw new Error("You must provide a TransactionContext via TransactionProvider");
+    throw new Error(
+      "You must provide a TransactionContext via TransactionProvider"
+    );
   }
 
   return transactionState;
 };
 
-export const useMyTransactionState = (myId: string | RegExp): TransactionState => {
+export const useMyTransactionState = (
+  myId: string | RegExp
+): TransactionState => {
   const [transactionState] = useTransactionState();
 
   return transactionState.type !== "idle" &&
-    (typeof myId === "string" ? transactionState.id === myId : transactionState.id.match(myId))
+    (typeof myId === "string"
+      ? transactionState.id === myId
+      : transactionState.id.match(myId))
     ? transactionState
     : { type: "idle" };
 };
@@ -148,7 +163,10 @@ type TransactionProps<C> = {
 export const useTransactionFunction = (
   id: string,
   send: TransactionFunction
-): [sendTransaction: () => Promise<void>, transactionState: TransactionState] => {
+): [
+  sendTransaction: () => Promise<void>,
+  transactionState: TransactionState
+] => {
   const [transactionState, setTransactionState] = useTransactionState();
 
   const sendTransaction = useCallback(async () => {
@@ -160,10 +178,13 @@ export const useTransactionFunction = (
       setTransactionState({
         type: "waitingForConfirmation",
         id,
-        tx
+        tx,
       });
     } catch (error) {
-      if (hasMessage(error) && error.message.includes("User denied transaction signature")) {
+      if (
+        hasMessage(error) &&
+        error.message.includes("User denied transaction signature")
+      ) {
         setTransactionState({ type: "cancelled", id });
       } else {
         console.error(error);
@@ -171,7 +192,7 @@ export const useTransactionFunction = (
         setTransactionState({
           type: "failed",
           id,
-          error: new Error("Failed to send transaction (try again)")
+          error: new Error("Failed to send transaction (try again)"),
         });
       }
     }
@@ -180,14 +201,16 @@ export const useTransactionFunction = (
   return [sendTransaction, transactionState];
 };
 
-export function Transaction<C extends React.ReactElement<ButtonlikeProps & Hoverable>>({
+export function Transaction<
+  C extends React.ReactElement<ButtonlikeProps & Hoverable>
+>({
   id,
   tooltip,
   tooltipPlacement,
   showFailure,
   requires,
   send,
-  children
+  children,
 }: TransactionProps<C>) {
   const [sendTransaction, transactionState] = useTransactionFunction(id, send);
   const trigger = React.Children.only<C>(children);
@@ -204,7 +227,9 @@ export function Transaction<C extends React.ReactElement<ButtonlikeProps & Hover
   }
 
   showFailure =
-    failureReasons.length > 0 ? showFailure ?? (tooltip ? "asTooltip" : "asChildText") : undefined;
+    failureReasons.length > 0
+      ? showFailure ?? (tooltip ? "asTooltip" : "asChildText")
+      : undefined;
 
   const clonedTrigger =
     showFailure === "asChildText"
@@ -212,7 +237,7 @@ export function Transaction<C extends React.ReactElement<ButtonlikeProps & Hover
           trigger,
           {
             disabled: true,
-            variant: "danger"
+            variant: "danger",
           },
           failureReasons[0]
         )
@@ -242,8 +267,13 @@ const tryToGetRevertReason = async (provider: Provider, hash: string) => {
     const tx = await provider.getTransaction(hash);
     const result = await provider.call(tx, tx.blockNumber);
 
-    if (hexDataLength(result) % 32 === 4 && hexDataSlice(result, 0, 4) === "0x08c379a0") {
-      return (defaultAbiCoder.decode(["string"], hexDataSlice(result, 4)) as [string])[0];
+    if (
+      hexDataLength(result) % 32 === 4 &&
+      hexDataSlice(result, 0, 4) === "0x08c379a0"
+    ) {
+      return (defaultAbiCoder.decode(["string"], hexDataSlice(result, 4)) as [
+        string
+      ])[0];
     }
   } catch {
     return undefined;
@@ -259,7 +289,9 @@ type TransactionProgressDonutProps = {
   state: TransactionState["type"];
 };
 
-const TransactionProgressDonut: React.FC<TransactionProgressDonutProps> = ({ state }) => {
+const TransactionProgressDonut: React.FC<TransactionProgressDonutProps> = ({
+  state,
+}) => {
   const [value, setValue] = useState(0);
   const maxValue = 1;
 
@@ -291,7 +323,10 @@ export const TransactionMonitor: React.FC = () => {
   const [transactionState, setTransactionState] = useTransactionState();
 
   const id = transactionState.type !== "idle" ? transactionState.id : undefined;
-  const tx = transactionState.type === "waitingForConfirmation" ? transactionState.tx : undefined;
+  const tx =
+    transactionState.type === "waitingForConfirmation"
+      ? transactionState.tx
+      : undefined;
 
   useEffect(() => {
     if (id && tx) {
@@ -309,8 +344,11 @@ export const TransactionMonitor: React.FC = () => {
           }
 
           const { confirmations } = receipt.rawReceipt;
-          const blockNumber = receipt.rawReceipt.blockNumber + confirmations - 1;
-          console.log(`Block #${blockNumber} ${confirmations}-confirms tx ${txHash}`);
+          const blockNumber =
+            receipt.rawReceipt.blockNumber + confirmations - 1;
+          console.log(
+            `Block #${blockNumber} ${confirmations}-confirms tx ${txHash}`
+          );
           console.log(`Finish monitoring tx ${txHash}`);
           finished = true;
 
@@ -319,7 +357,7 @@ export const TransactionMonitor: React.FC = () => {
 
             setTransactionState({
               type: "confirmedOneShot",
-              id
+              id,
             });
           } else {
             const reason = await tryToGetRevertReason(provider, txHash);
@@ -336,7 +374,7 @@ export const TransactionMonitor: React.FC = () => {
             setTransactionState({
               type: "failed",
               id,
-              error: new Error(reason ? `Reverted: ${reason}` : "Failed")
+              error: new Error(reason ? `Reverted: ${reason}` : "Failed"),
             });
           }
         } catch (rawError) {
@@ -350,7 +388,7 @@ export const TransactionMonitor: React.FC = () => {
           setTransactionState({
             type: "failed",
             id,
-            error: new Error("Failed")
+            error: new Error("Failed"),
           });
         }
       };
@@ -391,7 +429,10 @@ export const TransactionMonitor: React.FC = () => {
     }
   }, [transactionState.type, setTransactionState, id]);
 
-  if (transactionState.type === "idle" || transactionState.type === "waitingForApproval") {
+  if (
+    transactionState.type === "idle" ||
+    transactionState.type === "waitingForApproval"
+  ) {
     return null;
   }
 
@@ -412,7 +453,7 @@ export const TransactionMonitor: React.FC = () => {
         position: "fixed",
         width: "100vw",
         bottom: 0,
-        overflow: "hidden"
+        overflow: "hidden",
       }}
     >
       <Box sx={{ mr: 3, width: "40px", height: "40px" }}>

@@ -58,7 +58,7 @@ export const Staking: React.FC = () => {
           setEditedAmount={(amount) => setAmount(Decimal.from(amount))}
           maxAmount={maximumStake.toString()}
           maxedOut={hasSetMaximumStake}
-        ></EditableRow>
+        />
 
         {isDirty && <Validation amount={amount} />}
         <Description amount={amount} />

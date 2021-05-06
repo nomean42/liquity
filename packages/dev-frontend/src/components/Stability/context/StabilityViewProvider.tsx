@@ -3,6 +3,7 @@ import { useLiquitySelector } from "@liquity/lib-react";
 import { LiquityStoreState, StabilityDeposit } from "@liquity/lib-base";
 import { StabilityViewContext } from "./StabilityViewContext";
 import type { StabilityView, StabilityEvent } from "./types";
+import { StabilityDepositKind } from "../StabilityDepositManager";
 
 type StabilityEventTransitions = Record<
   StabilityView,
@@ -11,53 +12,55 @@ type StabilityEventTransitions = Record<
 
 const transitions: StabilityEventTransitions = {
   NONE: {
-    DEPOSIT_PRESSED: "DEPOSITING"
+    DEPOSIT_PRESSED: "DEPOSITING",
   },
   DEPOSITING: {
     CANCEL_PRESSED: "NONE",
-    DEPOSIT_CONFIRMED: "ACTIVE"
+    DEPOSIT_CONFIRMED: "ACTIVE",
   },
   ACTIVE: {
     REWARDS_CLAIMED: "ACTIVE",
     ADJUST_DEPOSIT_PRESSED: "ADJUSTING",
-    DEPOSIT_EMPTIED: "NONE"
+    DEPOSIT_EMPTIED: "NONE",
   },
   ADJUSTING: {
     CANCEL_PRESSED: "ACTIVE",
     DEPOSIT_CONFIRMED: "ACTIVE",
-    DEPOSIT_EMPTIED: "NONE"
-  }
+    DEPOSIT_EMPTIED: "NONE",
+  },
 };
 
-const transition = (view: StabilityView, event: StabilityEvent): StabilityView => {
-  const nextView = transitions[view][event] ?? view;
-  return nextView;
-};
+const transition = (
+  view: StabilityView,
+  event: StabilityEvent
+): StabilityView => transitions[view][event] ?? view;
 
 const getInitialView = (stabilityDeposit: StabilityDeposit): StabilityView => {
   return stabilityDeposit.isEmpty ? "NONE" : "ACTIVE";
 };
 
-const select = ({ stabilityDeposit }: LiquityStoreState): StabilityDeposit => stabilityDeposit;
+const select = ({ stabilityDeposit }: LiquityStoreState): StabilityDeposit =>
+  stabilityDeposit;
 
-export const StabilityViewProvider: React.FC = props => {
+export const StabilityViewProvider: React.FC = (props) => {
   const { children } = props;
   const stabilityDeposit = useLiquitySelector(select);
 
-  const [view, setView] = useState<StabilityView>(getInitialView(stabilityDeposit));
+  const [view, setView] = useState<StabilityView>(
+    getInitialView(stabilityDeposit)
+  );
+  const [kind, setKind] = useState<StabilityDepositKind | undefined>();
   const viewRef = useRef<StabilityView>(view);
 
-  const dispatchEvent = useCallback((event: StabilityEvent) => {
-    const nextView = transition(viewRef.current, event);
+  const dispatchEvent = useCallback(
+    (event: StabilityEvent, eventKind?: StabilityDepositKind) => {
+      const nextView = transition(viewRef.current, event);
 
-    console.log(
-      "dispatchEvent() [current-view, event, next-view]",
-      viewRef.current,
-      event,
-      nextView
-    );
-    setView(nextView);
-  }, []);
+      setView(nextView);
+      setKind(eventKind);
+    },
+    []
+  );
 
   useEffect(() => {
     viewRef.current = view;
@@ -71,8 +74,13 @@ export const StabilityViewProvider: React.FC = props => {
 
   const provider = {
     view,
-    dispatchEvent
+    kind,
+    dispatchEvent,
   };
 
-  return <StabilityViewContext.Provider value={provider}>{children}</StabilityViewContext.Provider>;
+  return (
+    <StabilityViewContext.Provider value={provider}>
+      {children}
+    </StabilityViewContext.Provider>
+  );
 };

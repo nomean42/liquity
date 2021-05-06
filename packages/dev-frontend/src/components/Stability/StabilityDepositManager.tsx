@@ -1,7 +1,12 @@
 import React, { useCallback, useEffect } from "react";
 import { Button, Flex } from "theme-ui";
 
-import { Decimal, Decimalish, LiquityStoreState } from "@liquity/lib-base";
+import {
+  Decimal,
+  Decimalish,
+  LiquityStoreState,
+  StabilityDeposit,
+} from "@liquity/lib-base";
 import {
   LiquityStoreUpdate,
   useLiquityReducer,
@@ -21,16 +26,28 @@ import {
   validateStabilityDepositChange,
 } from "./validation/validateStabilityDepositChange";
 
-const init = ({ stabilityDeposit }: LiquityStoreState) => ({
+interface StabilityDepositManagerState {
+  originalDeposit: StabilityDeposit;
+  editedLUSD: Decimal;
+  changePending: boolean;
+  kind?: StabilityDepositKind;
+}
+
+const init = ({
+  stabilityDeposit,
+}: LiquityStoreState): StabilityDepositManagerState => ({
   originalDeposit: stabilityDeposit,
-  editedLUSD: stabilityDeposit.currentLUSD,
+  editedLUSD: Decimal.ZERO,
   changePending: false,
 });
 
-type StabilityDepositManagerState = ReturnType<typeof init>;
+export type StabilityDepositKind = "DEPOSIT" | "WITHDRAW";
 type StabilityDepositManagerAction =
   | LiquityStoreUpdate
-  | { type: "startChange" | "finishChange" | "revert" }
+  | {
+      type: "startChange" | "finishChange" | "revert";
+      kind?: StabilityDepositKind;
+    }
   | { type: "setDeposit"; newValue: Decimalish };
 
 const reduceWith = (action: StabilityDepositManagerAction) => (
@@ -48,8 +65,7 @@ const reduce = (
 
   switch (action.type) {
     case "startChange": {
-      console.log("changeStarted");
-      return { ...state, changePending: true };
+      return { ...state, changePending: true, kind: action.kind };
     }
 
     case "finishChange":
@@ -102,16 +118,18 @@ export const StabilityDepositManager: React.FC = () => {
   const validationContext = useLiquitySelector(
     selectForStabilityDepositChangeValidation
   );
-  const { dispatchEvent } = useStabilityView();
+  const { dispatchEvent, kind } = useStabilityView();
 
   const handleCancel = useCallback(() => {
     dispatchEvent("CANCEL_PRESSED");
   }, [dispatchEvent]);
 
+  const isKindStake = kind === "DEPOSIT";
   const [validChange, description] = validateStabilityDepositChange(
     originalDeposit,
     editedLUSD,
-    validationContext
+    validationContext,
+    isKindStake
   );
 
   const makingNewDeposit = originalDeposit.isEmpty;
@@ -119,6 +137,7 @@ export const StabilityDepositManager: React.FC = () => {
   const myTransactionState = useMyTransactionState(transactionId);
 
   useEffect(() => {
+    console.log(myTransactionState.type);
     if (
       myTransactionState.type === "waitingForApproval" ||
       myTransactionState.type === "waitingForConfirmation"
@@ -134,12 +153,19 @@ export const StabilityDepositManager: React.FC = () => {
     }
   }, [myTransactionState.type, dispatch, dispatchEvent]);
 
+  const editedLUSDNormalized = isKindStake
+    ? originalDeposit.currentLUSD.add(editedLUSD)
+    : editedLUSD.gte(originalDeposit.currentLUSD)
+    ? Decimal.ZERO
+    : originalDeposit.currentLUSD.sub(editedLUSD);
+
   return (
     <StabilityDepositEditor
       originalDeposit={originalDeposit}
-      editedLUSD={editedLUSD}
+      editedLUSD={editedLUSDNormalized}
       changePending={changePending}
       dispatch={dispatch}
+      isKindStake={isKindStake}
     >
       {description ??
         (makingNewDeposit ? (

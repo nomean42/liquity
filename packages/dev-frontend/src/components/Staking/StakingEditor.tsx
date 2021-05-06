@@ -7,6 +7,7 @@ import { Units } from "../../strings";
 
 import { StakingInfoLine } from "./StakingInfoLine";
 import { EditorInput } from "../EditorInput";
+import { useStakingView } from "./context/StakingViewContext";
 
 const select = ({ lqtyBalance }: LiquityStoreState) => ({
   lqtyBalance,
@@ -26,18 +27,21 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
   dispatch,
   children,
 }) => {
+  const { changePending, kind } = useStakingView();
+  const isKindStake = kind === "STAKE";
+
   const { lqtyBalance } = useLiquitySelector(select);
   const setEditedStake = useCallback(
     (newValue) => dispatch({ type: "setStake", newValue }),
     [dispatch]
   );
-  const revert = useCallback(() => dispatch({ type: "revert" }), [
-    dispatch,
-  ]);
+  const revert = useCallback(() => dispatch({ type: "revert" }), [dispatch]);
 
   return (
     <EditorInput
-      title="Staking"
+      headingTitle="Staking"
+      staticRowLabel="Stake"
+      editableRowLabel={isKindStake ? "Stake" : "Withdraw"}
       originalStake={stakedLQTY}
       editedStake={editedLQTY}
       setEditedStake={setEditedStake}
@@ -45,6 +49,7 @@ export const StakingEditor: React.FC<StakingEditorProps> = ({
       revert={revert}
       inputId="stake-lqty"
       unit={Units.GT}
+      {...{ isKindStake, changePending }}
     >
       {!stakedLQTY.isZero && <StakingInfoLine editedLQTYAmount={editedLQTY} />}
       {children}

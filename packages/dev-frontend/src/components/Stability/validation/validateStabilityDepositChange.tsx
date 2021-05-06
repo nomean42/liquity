@@ -1,5 +1,6 @@
 import {
   Decimal,
+  Difference,
   LiquityStoreState,
   StabilityDeposit,
   StabilityDepositChange,
@@ -33,12 +34,15 @@ export const validateStabilityDepositChange = (
     lusdBalance,
     haveOwnFrontend,
     haveUndercollateralizedTroves,
-  }: StabilityDepositChangeValidationContext
+  }: StabilityDepositChangeValidationContext,
+  isKindStake: boolean
 ): [
   validChange: StabilityDepositChange<Decimal> | undefined,
   description: JSX.Element | undefined
 ] => {
-  const change = originalDeposit.whatChanged(editedLUSD);
+  if (editedLUSD.isZero) {
+    return [undefined, undefined];
+  }
 
   if (haveOwnFrontend) {
     return [
@@ -50,21 +54,35 @@ export const validateStabilityDepositChange = (
     ];
   }
 
-  if (!change) {
-    return [undefined, undefined];
-  }
+  const isDepositTooMuch = isKindStake && editedLUSD.gt(lusdBalance);
+  const isWithdrawTooMuch =
+    !isKindStake && editedLUSD.gt(originalDeposit.currentLUSD);
 
-  if (change.depositLUSD?.gt(lusdBalance)) {
+  if (isDepositTooMuch || isWithdrawTooMuch) {
     return [
       undefined,
       <ErrorDescription>
-        The amount you're trying to deposit exceeds your balance by{" "}
+        {`The amount you're trying to ${
+          isKindStake ? "deposit" : "withdraw"
+        } exceeds your ${isKindStake ? "balance" : "deposit"} by `}
         <Amount>
-          {change.depositLUSD.sub(lusdBalance).prettify()} {Units.COIN}
+          {Difference.between(
+            isKindStake ? lusdBalance : originalDeposit.currentLUSD,
+            editedLUSD
+          )?.absoluteValue?.prettify()}{" "}
+          {Units.COIN}
         </Amount>
         .
       </ErrorDescription>,
     ];
+  }
+
+  const change = isKindStake
+    ? originalDeposit.getDepositChange(editedLUSD)
+    : originalDeposit.getWithdrawChange(editedLUSD);
+
+  if (!change) {
+    return [undefined, undefined];
   }
 
   if (change.withdrawLUSD && haveUndercollateralizedTroves) {

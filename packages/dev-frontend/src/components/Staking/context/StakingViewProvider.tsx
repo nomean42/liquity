@@ -29,9 +29,6 @@ const reduce = (
   state: StakingViewProviderState,
   action: StakingViewProviderAction
 ): StakingViewProviderState => {
-  // console.log(state);
-  // console.log(action);
-
   switch (action.type) {
     case "startAdjusting":
       return { ...state, adjusting: true, kind: action.kind };

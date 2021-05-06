@@ -31,7 +31,7 @@ export const ReadOnlyStake: React.FC = () => {
           unit={Units.GT}
         />
         <StakingInfoLine />
-        <Flex variant="layout.actions" sx={{ justifyContent: "space-between" }}>
+        <Flex sx={{ mt: 2, justifyContent: "space-between" }}>
           <Button
             variant="outline"
             onClick={() => dispatch({ type: "startAdjusting", kind: "STAKE" })}

@@ -5,7 +5,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useStakingView } from "./Staking/context/StakingViewContext";
 import {
   Box,
   Button,
@@ -21,7 +20,9 @@ import { Decimal } from "@liquity/lib-base";
 import { Units } from "../strings";
 
 interface EditorInputProps {
-  title: string;
+  headingTitle: string;
+  staticRowLabel: string;
+  editableRowLabel: string;
   originalStake: Decimal;
   editedStake: Decimal;
   setEditedStake(value: Decimal): void;
@@ -29,6 +30,8 @@ interface EditorInputProps {
   revert(): void;
   inputId: string;
   unit: Units;
+  isKindStake: boolean;
+  changePending: boolean;
 }
 
 const editableStyle: ThemeUICSSProperties = {
@@ -48,7 +51,9 @@ const editableStyle: ThemeUICSSProperties = {
 };
 
 export const EditorInput: React.FC<EditorInputProps> = ({
-  title,
+  headingTitle,
+  staticRowLabel,
+  editableRowLabel,
   originalStake,
   editedStake,
   setEditedStake,
@@ -56,12 +61,11 @@ export const EditorInput: React.FC<EditorInputProps> = ({
   revert,
   inputId,
   unit,
+  isKindStake,
+  changePending,
   children,
 }) => {
-  const { changePending, kind } = useStakingView();
   const inputComponent = useRef<HTMLInputElement>(null);
-  const isKindStake = kind === "STAKE";
-
   const [invalid, setInvalid] = useState(false);
 
   const [maxAmount, maxedOut] = useMemo((): [Decimal, boolean] => {
@@ -125,7 +129,7 @@ export const EditorInput: React.FC<EditorInputProps> = ({
   return (
     <Card>
       <Heading>
-        {title}
+        {headingTitle}
         {!editedStake.eq(originalStake) && !changePending && (
           <Button
             variant="titleIcon"
@@ -137,7 +141,7 @@ export const EditorInput: React.FC<EditorInputProps> = ({
         )}
       </Heading>
       <Box sx={{ p: [2, 3] }}>
-        <Row labelId={`${inputId}-label`} label="Stake">
+        <Row labelId={`${inputId}-label`} label={staticRowLabel}>
           <StaticAmounts
             sx={{
               ...editableStyle,
@@ -166,7 +170,7 @@ export const EditorInput: React.FC<EditorInputProps> = ({
         </Row>
         <Row
           {...{
-            label: isKindStake ? "Stake" : "Withdraw",
+            label: editableRowLabel,
             labelFor: inputId,
             unit,
           }}

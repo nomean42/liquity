@@ -131,7 +131,7 @@ export const StakingManager: React.FC = () => {
     init
   );
   const lqtyBalance = useLiquitySelector(selectLQTYBalance);
-  const isStakeKind = kind === "STAKE";
+  const isKindStake = kind === "STAKE";
   const { stakedLQTY } = originalStake;
 
   const getValidChange = (): [
@@ -142,16 +142,16 @@ export const StakingManager: React.FC = () => {
       return [undefined, undefined];
     }
 
-    const isStakeTooMuch = isStakeKind && editedLQTY.gt(lqtyBalance);
-    const isWithdrawTooMuch = !isStakeKind && editedLQTY.gt(stakedLQTY);
+    const isStakeTooMuch = isKindStake && editedLQTY.gt(lqtyBalance);
+    const isWithdrawTooMuch = !isKindStake && editedLQTY.gt(stakedLQTY);
 
     if (isStakeTooMuch || isWithdrawTooMuch) {
       return [
         undefined,
         <ErrorDescription>
           {`The amount you're trying to ${
-            isStakeKind ? "stake" : "withdraw"
-          } exceeds your ${isStakeKind ? "balance" : "stake"} by `}
+            isKindStake ? "stake" : "withdraw"
+          } exceeds your ${isKindStake ? "balance" : "stake"} by `}
           <Amount>
             {Difference.between(
               stakedLQTY,
@@ -164,7 +164,7 @@ export const StakingManager: React.FC = () => {
       ];
     }
 
-    const change = isStakeKind
+    const change = isKindStake
       ? originalStake.getStakeChange(editedLQTY)
       : originalStake.getWithdrawChange(editedLQTY);
 
@@ -180,13 +180,13 @@ export const StakingManager: React.FC = () => {
   };
   const [validChange, description] = getValidChange();
 
-  const actionTitle = isStakeKind ? "Stake" : "Withdraw";
+  const actionTitle = isKindStake ? "Stake" : "Withdraw";
 
   return (
     <StakingEditor
       {...{
         stakedLQTY,
-        editedLQTY: isStakeKind
+        editedLQTY: isKindStake
           ? stakedLQTY.add(editedLQTY)
           : editedLQTY.gt(stakedLQTY)
           ? Decimal.ZERO
