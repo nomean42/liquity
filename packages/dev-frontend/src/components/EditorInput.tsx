@@ -72,8 +72,8 @@ export const EditorInput: React.FC<EditorInputProps> = ({
     if (isKindStake) {
       return [walletBalance, editedStake.sub(originalStake).gte(walletBalance)];
     }
-    // TODO wtf 0.000000000000220000?
-    return [originalStake, editedStake.lt(Decimal.from('0.00001'))];
+
+    return [originalStake, editedStake.eq(Decimal.ZERO)];
   }, [isKindStake, walletBalance, originalStake, editedStake]);
 
   useEffect(() => {
