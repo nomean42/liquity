@@ -5,11 +5,11 @@ import { useStabilityView } from "./context/StabilityViewContext";
 import { RemainingLQTY } from "./RemainingLQTY";
 import { Yield } from "./Yield";
 
-export const NoDeposit: React.FC = props => {
+export const NoDeposit: React.FC = (props) => {
   const { dispatchEvent } = useStabilityView();
 
   const handleOpenTrove = useCallback(() => {
-    dispatchEvent("DEPOSIT_PRESSED");
+    dispatchEvent("DEPOSIT_PRESSED", "DEPOSIT");
   }, [dispatchEvent]);
 
   return (
@@ -26,7 +26,9 @@ export const NoDeposit: React.FC = props => {
         </InfoMessage>
 
         <Flex variant="layout.actions">
-          <Flex sx={{ justifyContent: "flex-start", flex: 1, alignItems: "center" }}>
+          <Flex
+            sx={{ justifyContent: "flex-start", flex: 1, alignItems: "center" }}
+          >
             <Yield />
           </Flex>
           <Button onClick={handleOpenTrove}>Deposit</Button>

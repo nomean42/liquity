@@ -70,7 +70,7 @@ export const EditorInput: React.FC<EditorInputProps> = ({
 
   const [maxAmount, maxedOut] = useMemo((): [Decimal, boolean] => {
     if (isKindStake) {
-      return [walletBalance, editedStake.sub(originalStake).gte(walletBalance)];
+      return [walletBalance, editedStake.sub(originalStake).gt(walletBalance)];
     }
 
     return [originalStake, editedStake.eq(Decimal.ZERO)];
